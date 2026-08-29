@@ -11,11 +11,12 @@ The driving motivation behind this POC is a likely future refactoring of [sklein
   - [x] Test starting and stopping an LXC container
   - [x] Launch an LXC container with [incus-apply](https://incus-apply.abiosoft.com/)
   - [x] Test that mounting a host directory into the LXC container works
-  - [ ] Test SSH access to the LXC container
+  - [x] Test SSH access to the LXC container
   - [ ] Create a custom Fedora image with [distrobuilder](https://github.com/lxc/distrobuilder)
     - [ ] Test pushing and pulling this image
   - [ ] Test installing and using Podman inside the LXC container
   - [ ] Test cloning an LXC container
+  - [ ] Test setup Netbird installation and configuration
   - [ ] Create a script to measure
     - [ ] LXC container startup time
     - [x] Disk space used by an LXC container
@@ -25,11 +26,12 @@ The driving motivation behind this POC is a likely future refactoring of [sklein
   - [x] Test starting and stopping a QEMU VM
   - [x] Launch a QEMU VM with [incus-apply](https://incus-apply.abiosoft.com/)
   - [x] Test that mounting a host directory into the QEMU VM works
-  - [ ] Test SSH access to the QEMU VM
+  - [x] Test SSH access to the QEMU VM
   - [ ] Create a custom Fedora image with [distrobuilder](https://github.com/lxc/distrobuilder)
     - [ ] Test pushing and pulling this image
   - [ ] Test installing and using Podman inside the QEMU VM
   - [ ] Test cloning a QEMU VM
+  - [ ] Test setup Netbird installation and configuration
   - [ ] Create a script to measure
     - [ ] QEMU VM startup time
     - [x] Disk space used by a QEMU VM
@@ -154,17 +156,17 @@ $ incus image list images: fedora/44
 +-----------------------------+--------------+--------+----------------------------------+--------------+-----------------+-----------+-----------------------+
 |           ALIAS            | FINGERPRINT | PUBLIC |           DESCRIPTION            | ARCHITECTURE |      TYPE       |   SIZE    |    PUBLICATION DATE   |
 +-----------------------------+--------------+--------+----------------------------------+--------------+-----------------+-----------+-----------------------+
-| fedora/44 (3 de plus)       | 17d2b7249a1f | yes    | Fedora 44 amd64 (20260828_20:33) | x86_64       | VIRTUAL-MACHINE | 754.63MiB | 2026/08/28 02:00 CEST |
+| fedora/44 (3 more)       | 17d2b7249a1f | yes    | Fedora 44 amd64 (20260828_20:33) | x86_64       | VIRTUAL-MACHINE | 754.63MiB | 2026/08/28 02:00 CEST |
 +-----------------------------+--------------+--------+----------------------------------+--------------+-----------------+-----------+-----------------------+
-| fedora/44 (3 de plus)       | 794d87e8de86 | yes    | Fedora 44 amd64 (20260828_20:33) | x86_64       | CONTAINER       | 110.29MiB | 2026/08/28 02:00 CEST |
+| fedora/44 (3 more)       | 794d87e8de86 | yes    | Fedora 44 amd64 (20260828_20:33) | x86_64       | CONTAINER       | 110.29MiB | 2026/08/28 02:00 CEST |
 +-----------------------------+--------------+--------+----------------------------------+--------------+-----------------+-----------+-----------------------+
-| fedora/44/arm64 (1 de plus) | 3f1e393b552e | yes    | Fedora 44 arm64 (20260828_20:33) | aarch64      | VIRTUAL-MACHINE | 710.69MiB | 2026/08/28 02:00 CEST |
+| fedora/44/arm64 (1 more) | 3f1e393b552e | yes    | Fedora 44 arm64 (20260828_20:33) | aarch64      | VIRTUAL-MACHINE | 710.69MiB | 2026/08/28 02:00 CEST |
 +-----------------------------+--------------+--------+----------------------------------+--------------+-----------------+-----------+-----------------------+
-| fedora/44/arm64 (1 de plus) | 29608e45e688 | yes    | Fedora 44 arm64 (20260828_20:33) | aarch64      | CONTAINER       | 104.12MiB | 2026/08/28 02:00 CEST |
+| fedora/44/arm64 (1 more) | 29608e45e688 | yes    | Fedora 44 arm64 (20260828_20:33) | aarch64      | CONTAINER       | 104.12MiB | 2026/08/28 02:00 CEST |
 +-----------------------------+--------------+--------+----------------------------------+--------------+-----------------+-----------+-----------------------+
-| fedora/44/cloud (1 de plus) | 517e69071f1c | yes    | Fedora 44 amd64 (20260828_20:33) | x86_64       | CONTAINER       | 130.86MiB | 2026/08/28 02:00 CEST |
+| fedora/44/cloud (1 more) | 517e69071f1c | yes    | Fedora 44 amd64 (20260828_20:33) | x86_64       | CONTAINER       | 130.86MiB | 2026/08/28 02:00 CEST |
 +-----------------------------+--------------+--------+----------------------------------+--------------+-----------------+-----------+-----------------------+
-| fedora/44/cloud (1 de plus) | 195178d3444e | yes    | Fedora 44 amd64 (20260828_20:33) | x86_64       | VIRTUAL-MACHINE | 790.05MiB | 2026/08/28 02:00 CEST |
+| fedora/44/cloud (1 more) | 195178d3444e | yes    | Fedora 44 amd64 (20260828_20:33) | x86_64       | VIRTUAL-MACHINE | 790.05MiB | 2026/08/28 02:00 CEST |
 +-----------------------------+--------------+--------+----------------------------------+--------------+-----------------+-----------+-----------------------+
 | fedora/44/cloud/arm64       | c12e54f7cf75 | yes    | Fedora 44 arm64 (20260828_20:33) | aarch64      | VIRTUAL-MACHINE | 745.96MiB | 2026/08/28 02:00 CEST |
 +-----------------------------+--------------+--------+----------------------------------+--------------+-----------------+-----------+-----------------------+
@@ -233,7 +235,7 @@ Resources:
       Bytes sent: 0B
       Packets received: 0
       Packets sent: 0
-      Adresses IP:
+      IP addresses:
         inet:  127.0.0.1/8 (local)
         inet6: ::1/128 (local)
 ```
@@ -367,6 +369,40 @@ $ incus image list
 +-------+--------------+--------+----------------------------------+--------------+-----------------+-----------+-----------------------+
 ```
 
+## Launching an instance with cloud-init configured SSH access
+
+Here is a config file containing a [cloud-init](https://cloud-init.io/) configuration that installs and configures an SSH server and installs my public SSH key on the server:
+
+```sh
+$ cat test3-lxc.yaml
+config:
+  cloud-init.user-data: |
+    #cloud-config
+    packages:
+      - openssh-server
+    runcmd:
+      - systemctl enable --now sshd
+    users:
+      - name: fedora
+        ssh_authorized_keys:
+          - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDEzyNFlEuHIlewK0B8B0uAc9Q3JKjzi7myUMhvtB3JmA2BqHfVHyGimuAajSkaemjvIlWZ3IFddf0UibjOfmQH57/faxcNEino+6uPRjs0pFH8sNKWAaPX1qYqOFhB3m+om0hZDeQCyZ1x1R6m+B0VJHWQ3pxFaxQvL/K+454AmIWB0b87MMHHX0UzUja5D6sHYscHo57rzJI1fc66+AFz4fcRd/z+sUsDlLSIOWfVNuzXuGpKYuG+VW9moiMTUo8gTE9Nam6V2uFwv2w3NaOs/2KL+PpbY662v+iIB2Yyl4EP1JgczShOoZkLatnw823nD1muC8tYODxVq7Xf7pM/NSCf3GPCXtxoOEqxprLapIet0uBSB4oNZhC9h7K/1MEaBGbU+E2J5/5hURYDmYXy6KZWqrK/OEf4raGqx1bsaWcONOfIVXbj3zXTUobsqSkyCkkR3hJbf39JZ8/6ONAJS/3O+wFZknFJYmaRPuaWiLZxRj5/gw01vkNVMrogOIkQtzNDB6fh2q27ghSRkAkM8EVqkW21WkpB7y16Vzva4KSZgQcFcyxUTqG414fP+/V38aCopGpqB6XjnvyRorPHXjm2ViVWbjxmBSQ9aK0+2MeKA9WmHN0QoBMVRPrN6NBa3z20z1kMQ/qlRXiDFOEkuW4C1n2KTVNd6IOGE8AufQ== contact@stephane-klein.info
+```
+
+Launching a "cloud" type LXC instance:
+
+```sh
+$ incus launch images:fedora/44/cloud test3-lxc < test3-lxc.yaml
+$ incus list
++-----------+---------+---------------------+------------------------------------------------+-----------+-------------+
+|    NAME   |  STATE  |        IPv4         |                      IPv6                      |   TYPE    | SNAPSHOTS  |
++-----------+---------+---------------------+------------------------------------------------+-----------+-------------+
+| test3-lxc | RUNNING | 10.95.83.192 (eth0) | fd42:15b1:7fa2:bcd0:1266:6aff:fe54:8ca1 (eth0) | CONTAINER | 0           |
++-----------+---------+---------------------+------------------------------------------------+-----------+-------------+
+
+$ ssh fedora@10.95.83.192
+[fedora@test3-lxc ~]$ exit
+```
+
 ## Testing incus-apply
 
 Using [incus-apply](https://github.com/abiosoft/incus-apply), to launch instances from a declarative file.
@@ -388,9 +424,9 @@ build date: 2026-08-29T20:29:19Z
 Here is the content of a file describing the configuration of a container and a QEMU VM I want to create with *incus-apply*:
 
 ```sh
-$ cat test3.incus.yaml
+$ cat test4.incus.yaml
 kind: instance
-name: test3-lxc
+name: test4-lxc
 image: images:fedora/44/cloud
 profiles:
   - default
@@ -399,9 +435,20 @@ devices:
     type: disk
     source: ./volumes/volume1
     path: /mnt/volume1
+config:
+  cloud-init.user-data: |
+    #cloud-config
+    packages:
+      - openssh-server
+    runcmd:
+      - systemctl enable --now sshd
+    users:
+      - name: fedora
+        ssh_authorized_keys:
+          - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDEzyNFlEuHIlewK0B8B0uAc9Q3JKjzi7myUMhvtB3JmA2BqHfVHyGimuAajSkaemjvIlWZ3IFddf0UibjOfmQH57/faxcNEino+6uPRjs0pFH8sNKWAaPX1qYqOFhB3m+om0hZDeQCyZ1x1R6m+B0VJHWQ3pxFaxQvL/K+454AmIWB0b87MMHHX0UzUja5D6sHYscHo57rzJI1fc66+AFz4fcRd/z+sUsDlLSIOWfVNuzXuGpKYuG+VW9moiMTUo8gTE9Nam6V2uFwv2w3NaOs/2KL+PpbY662v+iIB2Yyl4EP1JgczShOoZkLatnw823nD1muC8tYODxVq7Xf7pM/NSCf3GPCXtxoOEqxprLapIet0uBSB4oNZhC9h7K/1MEaBGbU+E2J5/5hURYDmYXy6KZWqrK/OEf4raGqx1bsaWcONOfIVXbj3zXTUobsqSkyCkkR3hJbf39JZ8/6ONAJS/3O+wFZknFJYmaRPuaWiLZxRj5/gw01vkNVMrogOIkQtzNDB6fh2q27ghSRkAkM8EVqkW21WkpB7y16Vzva4KSZgQcFcyxUTqG414fP+/V38aCopGpqB6XjnvyRorPHXjm2ViVWbjxmBSQ9aK0+2MeKA9WmHN0QoBMVRPrN6NBa3z20z1kMQ/qlRXiDFOEkuW4C1n2KTVNd6IOGE8AufQ== contact@stephane-klein.info
 ---
 kind: instance
-name: test3-vm
+name: test4-vm
 image: images:fedora/44/cloud
 vm: true
 profiles:
@@ -411,68 +458,92 @@ devices:
     type: disk
     source: ./volumes/volume1
     path: /mnt/volume1
+config:
+  cloud-init.user-data: |
+    #cloud-config
+    packages:
+      - openssh-server
+    runcmd:
+      - systemctl enable --now sshd
+    users:
+      - name: fedora
+        ssh_authorized_keys:
+          - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDEzyNFlEuHIlewK0B8B0uAc9Q3JKjzi7myUMhvtB3JmA2BqHfVHyGimuAajSkaemjvIlWZ3IFddf0UibjOfmQH57/faxcNEino+6uPRjs0pFH8sNKWAaPX1qYqOFhB3m+om0hZDeQCyZ1x1R6m+B0VJHWQ3pxFaxQvL/K+454AmIWB0b87MMHHX0UzUja5D6sHYscHo57rzJI1fc66+AFz4fcRd/z+sUsDlLSIOWfVNuzXuGpKYuG+VW9moiMTUo8gTE9Nam6V2uFwv2w3NaOs/2KL+PpbY662v+iIB2Yyl4EP1JgczShOoZkLatnw823nD1muC8tYODxVq7Xf7pM/NSCf3GPCXtxoOEqxprLapIet0uBSB4oNZhC9h7K/1MEaBGbU+E2J5/5hURYDmYXy6KZWqrK/OEf4raGqx1bsaWcONOfIVXbj3zXTUobsqSkyCkkR3hJbf39JZ8/6ONAJS/3O+wFZknFJYmaRPuaWiLZxRj5/gw01vkNVMrogOIkQtzNDB6fh2q27ghSRkAkM8EVqkW21WkpB7y16Vzva4KSZgQcFcyxUTqG414fP+/V38aCopGpqB6XjnvyRorPHXjm2ViVWbjxmBSQ9aK0+2MeKA9WmHN0QoBMVRPrN6NBa3z20z1kMQ/qlRXiDFOEkuW4C1n2KTVNd6IOGE8AufQ== contact@stephane-klein.info
 ```
 
 ```sh
-$ incus-apply test3.incus.yaml -y
+$ incus-apply -y test4.incus.yaml
 
 Found 2 resources in 1 file.
 
 The following actions would be performed:
 
   create (2):
-    + instance/test3-lxc
-      └─ launch
-    + instance/test3-vm
-      └─ launch
+    + instance/test4-lxc
+      └─ launch, cloud-init
+    + instance/test4-vm
+      └─ launch, cloud-init
 
 Summary: 2 to create.
-+ instance/test3-lxc created
++ instance/test4-lxc created
   └─ started
-+ instance/test3-vm created
++ instance/test4-vm created
   └─ started
 
 Summary: 2 created.
 
 $ incus list
-+-----------+---------+---------------------+------------------------------------------------+-----------------+-----------+
-|    NAME   |  STATE  |        IPv4         |                      IPv6                      |      TYPE       | SNAPSHOTS |
-+-----------+---------+---------------------+------------------------------------------------+-----------------+-----------+
-| test3-lxc | RUNNING | 10.95.83.109 (eth0) | fd42:15b1:7fa2:bcd0:1266:6aff:fe26:967 (eth0)  | CONTAINER       | 0         |
-+-----------+---------+---------------------+------------------------------------------------+-----------------+-----------+
-| test3-vm  | RUNNING |                     | fd42:15b1:7fa2:bcd0:1266:6aff:febb:5e5a (eth0) | VIRTUAL-MACHINE | 0         |
-+-----------+---------+---------------------+------------------------------------------------+-----------------+-----------+
++-----------+---------+-----------------------+--------------------------------------------------+-----------------+-------------+
+|    NAME   |  STATE  |         IPv4          |                       IPv6                       |      TYPE       | SNAPSHOTS  |
++-----------+---------+-----------------------+--------------------------------------------------+-----------------+-------------+
+| test4-lxc | RUNNING | 10.95.83.200 (eth0)   | fd42:15b1:7fa2:bcd0:1266:6aff:fe2e:5cc7 (eth0)   | CONTAINER       | 0           |
++-----------+---------+-----------------------+--------------------------------------------------+-----------------+-------------+
+| test4-vm  | RUNNING | 10.95.83.107 (enp5s0) | fd42:15b1:7fa2:bcd0:1266:6aff:fe70:dcc4 (enp5s0) | VIRTUAL-MACHINE | 0           |
++-----------+---------+-----------------------+--------------------------------------------------+-----------------+-------------+
 ```
 
 Let me verify the mount points are accessible:
 
 ```sh
-$ incus exec test3-lxc -- ls /mnt/volume1/
+$ incus exec test4-lxc -- ls /mnt/volume1/
 foobar.txt
 
-$ incus exec test3-vm -- ls /mnt/volume1/
+$ incus exec test4-vm -- ls /mnt/volume1/
 foobar.txt
+```
+
+I test SSH access:
+
+```
+$ ssh fedora@10.95.83.200
+[fedora@test4-lxc ~]$ exit
+logout
+Connection to 10.95.83.200 closed.
+
+$ ssh fedora@10.95.83.107
+[fedora@test4-vm ~]$
+logout
 ```
 
 *incus-apply* can also delete instances:
 
 ```sh
-$ incus-apply -d test3.incus.yaml
+$ incus-apply -d test4.incus.yaml
 
 Found 2 resources in 1 file.
 
 The following actions would be performed:
 
   delete (2):
-    - instance/test3-lxc
-    - instance/test3-vm
+    - instance/test4-lxc
+    - instance/test4-vm
 
 Summary: 2 to delete.
 
 Proceed to delete these resources? [y/N]: y
 
-- instance/test3-lxc deleted
-- instance/test3-vm deleted
+- instance/test4-lxc deleted
+- instance/test4-vm deleted
 
 Summary: 2 deleted, 0 skipped, 0 errors.
 ```
@@ -484,17 +555,17 @@ $ incus list
 +-----------+---------+-----------------------+--------------------------------------------------+-----------------+-----------+
 |    NAME   |  STATE  |         IPv4          |                       IPv6                       |      TYPE       | SNAPSHOTS |
 +-----------+---------+-----------------------+--------------------------------------------------+-----------------+-----------+
-| test3-lxc | RUNNING | 10.95.83.109 (eth0)   | fd42:15b1:7fa2:bcd0:1266:6aff:fe26:967 (eth0)    | CONTAINER       | 0         |
+| test4-lxc | RUNNING | 10.95.83.109 (eth0)   | fd42:15b1:7fa2:bcd0:1266:6aff:fe26:967 (eth0)    | CONTAINER       | 0         |
 +-----------+---------+-----------------------+--------------------------------------------------+-----------------+-----------+
-| test3-vm  | RUNNING | 10.95.83.145 (enp5s0) | fd42:15b1:7fa2:bcd0:1266:6aff:febb:5e5a (enp5s0) | VIRTUAL-MACHINE | 0         |
+| test4-vm  | RUNNING | 10.95.83.145 (enp5s0) | fd42:15b1:7fa2:bcd0:1266:6aff:febb:5e5a (enp5s0) | VIRTUAL-MACHINE | 0         |
 +-----------+---------+-----------------------+--------------------------------------------------+-----------------+-----------+
 
 $ mise run incus-btrfs-usage
 [incus-btrfs-usage] $ sudo bash scripts/incus-btrfs-usage.sh
 INSTANCE                     TYPE                         EXCLUSIVE       SHARED
 --------                     ----                         ---------       ------
-test3-lxc                    CONTAINER (LXC)             108.91MiB      501.94MiB
-test3-vm                     VIRTUAL-MACHINE (QEMU)      644.38MiB        1.18GiB
+test4-lxc                    CONTAINER (LXC)             108.91MiB      501.94MiB
+test4-vm                     VIRTUAL-MACHINE (QEMU)      644.38MiB        1.18GiB
 
 Overall usage of pool 'default':
        Total   Exclusive  Set shared  Filename
