@@ -1,0 +1,6 @@
+[tools]
+"github:stephane-klein/incus-apply" = { version = "v0.1.2-sklein-draft", bin = "incus-apply" }
+
+[tasks.incus-btrfs-usage]
+description = "Affiche l'espace disque btrfs exclusif par instance incus (LXC + QEMU)"
+run = "sudo bash scripts/incus-btrfs-usage.sh"

@@ -9,28 +9,30 @@ The driving motivation behind this POC is a likely future refactoring of [sklein
 - [ ] Tests to run on Incus in LXC mode
   - [x] Launch a basic Fedora
   - [x] Test starting and stopping an LXC container
-  - [ ] Create a custom Fedora image
-    - [ ] Test pushing and pulling this image
-  - [ ] Test that mounting a host directory into the LXC container works
-  - [ ] Test installing and using Podman inside the LXC container
+  - [x] Launch an LXC container with [incus-apply](https://incus-apply.abiosoft.com/)
+  - [x] Test that mounting a host directory into the LXC container works
   - [ ] Test SSH access to the LXC container
+  - [ ] Create a custom Fedora image with [distrobuilder](https://github.com/lxc/distrobuilder)
+    - [ ] Test pushing and pulling this image
+  - [ ] Test installing and using Podman inside the LXC container
   - [ ] Test cloning an LXC container
   - [ ] Create a script to measure
     - [ ] LXC container startup time
-    - [ ] Disk space used by an LXC container
+    - [x] Disk space used by an LXC container
     - [ ] RAM usage of an LXC container
 - [ ] Tests to run on Incus in QEMU mode
   - [x] Launch a basic Fedora
   - [x] Test starting and stopping a QEMU VM
-  - [ ] Create a custom Fedora image
-    - [ ] Test pushing and pulling this image
-  - [ ] Test that mounting a host directory into the QEMU VM works
-  - [ ] Test installing and using Podman inside the QEMU VM
+  - [x] Launch a QEMU VM with [incus-apply](https://incus-apply.abiosoft.com/)
+  - [x] Test that mounting a host directory into the QEMU VM works
   - [ ] Test SSH access to the QEMU VM
+  - [ ] Create a custom Fedora image with [distrobuilder](https://github.com/lxc/distrobuilder)
+    - [ ] Test pushing and pulling this image
+  - [ ] Test installing and using Podman inside the QEMU VM
   - [ ] Test cloning a QEMU VM
   - [ ] Create a script to measure
     - [ ] QEMU VM startup time
-    - [ ] Disk space used by a QEMU VM
+    - [x] Disk space used by a QEMU VM
     - [ ] RAM usage of a QEMU VM
 - [ ] Test [IncusOS](https://linuxcontainers.org/incus-os/introduction/) by installing it on my [Tuxedo Infinity Flexible 14 Gen 1](https://notes.sklein.xyz/Tuxedo%20Infinity%20Flexible%2014%20Gen%201/) laptop, which I currently don't use and which could serve as a development server until RAM prices drop
 
@@ -78,16 +80,16 @@ TriggeredBy: ● incus.socket
      CGroup: /system.slice/incus.service
              └─164118 /usr/libexec/incus/incusd --group incus-admin
 
-août 29 18:38:30 t14s incusd[164118]: time="2026-08-29T18:38:30+02:00" level=error msg="Unable to parse system idmap" err="No map found for user"
-août 29 18:38:30 t14s incusd[164118]: time="2026-08-29T18:38:30+02:00" level=warning msg="AppArmor support has been disabled because of lack of kernel support"
-août 29 18:38:30 t14s incusd[164118]: time="2026-08-29T18:38:30+02:00" level=warning msg=" - AppArmor support has been disabled, Disabled because of lack of kernel support"
-août 29 18:38:30 t14s qemu-system-x86_64[164192]: *HARK*  log.c:  92: core_log_lib_info: src version: 2.1.0
-août 29 18:38:30 t14s qemu-system-x86_64[164192]: *HARK*  log.c:  94: core_log_lib_info: compiled with support for shutdown state
-août 29 18:38:30 t14s qemu-system-x86_64[164192]: *HARK*  log.c:  97: core_log_lib_info: compiled with libndctl 63+
-août 29 18:38:30 t14s qemu-system-x86_64[164196]: *HARK*  log.c:  92: core_log_lib_info: src version: 2.1.0
-août 29 18:38:30 t14s qemu-system-x86_64[164196]: *HARK*  log.c:  94: core_log_lib_info: compiled with support for shutdown state
-août 29 18:38:30 t14s qemu-system-x86_64[164196]: *HARK*  log.c:  97: core_log_lib_info: compiled with libndctl 63+
-août 29 18:38:31 t14s systemd[1]: Started incus.service - Incus - Daemon.
+Aug 29 18:38:30 t14s incusd[164118]: time="2026-08-29T18:38:30+02:00" level=error msg="Unable to parse system idmap" err="No map found for user"
+Aug 29 18:38:30 t14s incusd[164118]: time="2026-08-29T18:38:30+02:00" level=warning msg="AppArmor support has been disabled because of lack of kernel support"
+Aug 29 18:38:30 t14s incusd[164118]: time="2026-08-29T18:38:30+02:00" level=warning msg=" - AppArmor support has been disabled, Disabled because of lack of kernel support"
+Aug 29 18:38:30 t14s qemu-system-x86_64[164192]: *HARK*  log.c:  92: core_log_lib_info: src version: 2.1.0
+Aug 29 18:38:30 t14s qemu-system-x86_64[164192]: *HARK*  log.c:  94: core_log_lib_info: compiled with support for shutdown state
+Aug 29 18:38:30 t14s qemu-system-x86_64[164192]: *HARK*  log.c:  97: core_log_lib_info: compiled with libndctl 63+
+Aug 29 18:38:30 t14s qemu-system-x86_64[164196]: *HARK*  log.c:  92: core_log_lib_info: src version: 2.1.0
+Aug 29 18:38:30 t14s qemu-system-x86_64[164196]: *HARK*  log.c:  94: core_log_lib_info: compiled with support for shutdown state
+Aug 29 18:38:30 t14s qemu-system-x86_64[164196]: *HARK*  log.c:  97: core_log_lib_info: compiled with libndctl 63+
+Aug 29 18:38:31 t14s systemd[1]: Started incus.service - Incus - Daemon.
 ```
 
 Here's how I initialized Incus:
@@ -95,19 +97,19 @@ Here's how I initialized Incus:
 ```sh
 $ incus admin init
 Would you like to use clustering? (yes/no) [default=no]: no
-Voulez-vous configurer un nouveau pool de stockage ? (yes/no) [default=yes]: yes
-Nom du nouveau pool de stockage [default=default]:
-Nom du backend de stockage à utiliser (btrfs, dir, lvm) [default=btrfs]: btrfs
+Would you like to configure a new storage pool? (yes/no) [default=yes]: yes
+Name of the new storage pool [default=default]:
+Name of the storage backend to use (btrfs, dir, lvm) [default=btrfs]: btrfs
 Would you like to create a new btrfs subvolume under /var/lib/incus? (yes/no) [default=yes]: yes
-Voulez-vous créer un nouveau bridge réseau local ? (yes/no) [default=yes]: yes
-Quel nom donner au nouveau bridge ? [default=incusbr0]:
-Quelle adresse IPv4 utiliser ? (CIDR subnet notation, “auto” or “none”) [default=auto]:
-Quelle adresse IPv6 utiliser ? (CIDR subnet notation, “auto” or “none”) [default=auto]:
-Voulez-vous rendre le serveur accessible depuis le réseau ? (yes/no) [default=no]: yes
-Adresses à associé à (sans inclure les ports) [default=all]:
-Port auquel se lier [default=8443]:
-Voulez-vous que les images mises en cache périmées soient mises à jour automatiquement ? (yes/no) [default=yes]:
-Voulez-vous voir le fichier YAML de préconfiguration ? (yes/no) [default=no]: yes
+Would you like to create a new local network bridge? (yes/no) [default=yes]: yes
+What name to give the new bridge? [default=incusbr0]:
+Which IPv4 address to use? (CIDR subnet notation, "auto" or "none") [default=auto]:
+Which IPv6 address to use? (CIDR subnet notation, "auto" or "none") [default=auto]:
+Would you like to make the server available over the network? (yes/no) [default=no]: yes
+Addresses to associate (excluding ports) [default=all]:
+Port to bind to [default=8443]:
+Would you like cached expired images to be updated automatically? (yes/no) [default=yes]:
+Would you like to see the preseed YAML file? (yes/no) [default=no]: yes
 config:
   core.https_address: '[::]:8443'
 networks:
@@ -150,23 +152,23 @@ cluster: null
 ```sh
 $ incus image list images: fedora/44
 +-----------------------------+--------------+--------+----------------------------------+--------------+-----------------+-----------+-----------------------+
-|            ALIAS            |  EMPREINTE   | PUBLIC |           DESCRIPTION            | ARCHITECTURE |      TYPE       |  TAILLE   |  DATE DE PUBLICATION  |
+|           ALIAS            | FINGERPRINT | PUBLIC |           DESCRIPTION            | ARCHITECTURE |      TYPE       |   SIZE    |    PUBLICATION DATE   |
 +-----------------------------+--------------+--------+----------------------------------+--------------+-----------------+-----------+-----------------------+
-| fedora/44 (3 de plus)       | 17d2b7249a1f | oui    | Fedora 44 amd64 (20260828_20:33) | x86_64       | VIRTUAL-MACHINE | 754.63MiB | 2026/08/28 02:00 CEST |
+| fedora/44 (3 de plus)       | 17d2b7249a1f | yes    | Fedora 44 amd64 (20260828_20:33) | x86_64       | VIRTUAL-MACHINE | 754.63MiB | 2026/08/28 02:00 CEST |
 +-----------------------------+--------------+--------+----------------------------------+--------------+-----------------+-----------+-----------------------+
-| fedora/44 (3 de plus)       | 794d87e8de86 | oui    | Fedora 44 amd64 (20260828_20:33) | x86_64       | CONTAINER       | 110.29MiB | 2026/08/28 02:00 CEST |
+| fedora/44 (3 de plus)       | 794d87e8de86 | yes    | Fedora 44 amd64 (20260828_20:33) | x86_64       | CONTAINER       | 110.29MiB | 2026/08/28 02:00 CEST |
 +-----------------------------+--------------+--------+----------------------------------+--------------+-----------------+-----------+-----------------------+
-| fedora/44/arm64 (1 de plus) | 3f1e393b552e | oui    | Fedora 44 arm64 (20260828_20:33) | aarch64      | VIRTUAL-MACHINE | 710.69MiB | 2026/08/28 02:00 CEST |
+| fedora/44/arm64 (1 de plus) | 3f1e393b552e | yes    | Fedora 44 arm64 (20260828_20:33) | aarch64      | VIRTUAL-MACHINE | 710.69MiB | 2026/08/28 02:00 CEST |
 +-----------------------------+--------------+--------+----------------------------------+--------------+-----------------+-----------+-----------------------+
-| fedora/44/arm64 (1 de plus) | 29608e45e688 | oui    | Fedora 44 arm64 (20260828_20:33) | aarch64      | CONTAINER       | 104.12MiB | 2026/08/28 02:00 CEST |
+| fedora/44/arm64 (1 de plus) | 29608e45e688 | yes    | Fedora 44 arm64 (20260828_20:33) | aarch64      | CONTAINER       | 104.12MiB | 2026/08/28 02:00 CEST |
 +-----------------------------+--------------+--------+----------------------------------+--------------+-----------------+-----------+-----------------------+
-| fedora/44/cloud (1 de plus) | 517e69071f1c | oui    | Fedora 44 amd64 (20260828_20:33) | x86_64       | CONTAINER       | 130.86MiB | 2026/08/28 02:00 CEST |
+| fedora/44/cloud (1 de plus) | 517e69071f1c | yes    | Fedora 44 amd64 (20260828_20:33) | x86_64       | CONTAINER       | 130.86MiB | 2026/08/28 02:00 CEST |
 +-----------------------------+--------------+--------+----------------------------------+--------------+-----------------+-----------+-----------------------+
-| fedora/44/cloud (1 de plus) | 195178d3444e | oui    | Fedora 44 amd64 (20260828_20:33) | x86_64       | VIRTUAL-MACHINE | 790.05MiB | 2026/08/28 02:00 CEST |
+| fedora/44/cloud (1 de plus) | 195178d3444e | yes    | Fedora 44 amd64 (20260828_20:33) | x86_64       | VIRTUAL-MACHINE | 790.05MiB | 2026/08/28 02:00 CEST |
 +-----------------------------+--------------+--------+----------------------------------+--------------+-----------------+-----------+-----------------------+
-| fedora/44/cloud/arm64       | c12e54f7cf75 | oui    | Fedora 44 arm64 (20260828_20:33) | aarch64      | VIRTUAL-MACHINE | 745.96MiB | 2026/08/28 02:00 CEST |
+| fedora/44/cloud/arm64       | c12e54f7cf75 | yes    | Fedora 44 arm64 (20260828_20:33) | aarch64      | VIRTUAL-MACHINE | 745.96MiB | 2026/08/28 02:00 CEST |
 +-----------------------------+--------------+--------+----------------------------------+--------------+-----------------+-----------+-----------------------+
-| fedora/44/cloud/arm64       | ddec5bf0fb94 | oui    | Fedora 44 arm64 (20260828_20:33) | aarch64      | CONTAINER       | 123.79MiB | 2026/08/28 02:00 CEST |
+| fedora/44/cloud/arm64       | ddec5bf0fb94 | yes    | Fedora 44 arm64 (20260828_20:33) | aarch64      | CONTAINER       | 123.79MiB | 2026/08/28 02:00 CEST |
 +-----------------------------+--------------+--------+----------------------------------+--------------+-----------------+-----------+-----------------------+
 ```
 
@@ -192,34 +194,34 @@ Let me look at the instance's details:
 
 ```sh
 $ incus info test1
-Nom : test1
-Description :
-État : RUNNING
-Type : container
-Architecture : x86_64
-PID : 191282
-Créé : 2026/08/29 19:13 CEST
+Name: test1
+Description:
+State: RUNNING
+Type: container
+Architecture: x86_64
+PID: 191282
+Created: 2026/08/29 19:13 CEST
 Last Used: 2026/08/29 19:13 CEST
 Started: 2026/08/29 19:13 CEST
 
-Ressources :
-  Processus : 16
-  CPU utilisé :
-    CPU utilisé (en secondes): 1
-  Utilisation mémoire :
-    Mémoire (courante): 87.99MiB
-  Réseau utilisé :
+Resources:
+  Processes: 16
+  CPU usage:
+    CPU used (in seconds): 1
+  Memory usage:
+    Memory (current): 87.99MiB
+  Network usage:
     eth0:
       Type: broadcast
       State: UP
-      Interface hôte: vethf0f4a29f
+      Host interface: vethf0f4a29f
       MAC address: 10:66:6a:30:15:16
       MTU: 1500
-      Octets reçus: 13.80kB
-      Octets émis: 2.67kB
-      Paquets reçus: 36
-      Paquets émis: 27
-      Adresses IP:
+      Bytes received: 13.80kB
+      Bytes sent: 2.67kB
+      Packets received: 36
+      Packets sent: 27
+      IP addresses:
         inet:  10.95.83.57/24 (global)
         inet6: fd42:15b1:7fa2:bcd0:1266:6aff:fe30:1516/64 (global)
         inet6: fe80::1266:6aff:fe30:1516/64 (link)
@@ -227,10 +229,10 @@ Ressources :
       Type: loopback
       State: UP
       MTU: 65536
-      Octets reçus: 0B
-      Octets émis: 0B
-      Paquets reçus: 0
-      Paquets émis: 0
+      Bytes received: 0B
+      Bytes sent: 0B
+      Packets received: 0
+      Packets sent: 0
       Adresses IP:
         inet:  127.0.0.1/8 (local)
         inet6: ::1/128 (local)
@@ -266,11 +268,11 @@ I'll stop the container:
 ```sh
 $ incus stop test1
 $ incus list
-+-------+---------+------+------+-----------+-------------+
-|  NOM  |  ÉTAT   | IPv4 | IPv6 |   TYPE    | INSTANTANÉS |
-+-------+---------+------+------+-----------+-------------+
-| test1 | STOPPED |      |      | CONTAINER | 0           |
-+-------+---------+------+------+-----------+-------------+
++-------+---------+------+------+-----------+-----------+
+| NAME  |  STATE  | IPv4 | IPv6 |   TYPE    | SNAPSHOTS |
++-------+---------+------+------+-----------+-----------+
+| test1 | STOPPED |      |      | CONTAINER | 0         |
++-------+---------+------+------+-----------+-----------+
 ```
 
 I'll delete the container:
@@ -278,9 +280,9 @@ I'll delete the container:
 ```sh
 $ incus delete test1
 $ incus list
-+-----+------+------+------+------+-------------+
-| NOM | ÉTAT | IPv4 | IPv6 | TYPE | INSTANTANÉS |
-+-----+------+------+------+------+-------------+
++-----+------+------+------+------+-----------+
+| NAME | STATE | IPv4 | IPv6 | TYPE | SNAPSHOTS |
++-----+------+------+------+------+-----------+
 ```
 
 ## Launching my first Qemu Fedora VM
@@ -335,9 +337,9 @@ $ incus list
 +-------+---------+-------------------+------------------------------------------------+-----------------+-------------+
 $ incus delete test2 --force
 $ incus list
-+-----+------+------+------+------+-------------+
-| NOM | ÉTAT | IPv4 | IPv6 | TYPE | INSTANTANÉS |
-+-----+------+------+------+------+-------------+
++-----+------+------+------+------+-----------+
+| NAME | STATE | IPv4 | IPv6 | TYPE | SNAPSHOTS |
++-----+------+------+------+------+-----------+
 ```
 
 ## Image management
@@ -363,4 +365,138 @@ $ incus image list
 +-------+--------------+--------+----------------------------------+--------------+-----------------+-----------+-----------------------+
 |       | 17d2b7249a1f | no     | Fedora 44 amd64 (20260828_20:33) | x86_64       | VIRTUAL-MACHINE | 754.63MiB | 2026/08/29 19:43 CEST |
 +-------+--------------+--------+----------------------------------+--------------+-----------------+-----------+-----------------------+
+```
+
+## Testing incus-apply
+
+Using [incus-apply](https://github.com/abiosoft/incus-apply), to launch instances from a declarative file.
+
+> [!note]
+>
+> In this POC, I use my fork of *incus-apply* ([here](https://github.com/stephane-klein/incus-apply)), which includes this pull request: [`dev: resolve relative disk device sources`](https://github.com/abiosoft/incus-apply/pull/67)
+
+I install *incus-apply* with [Mise](https://mise.jdx.dev/):
+
+```ssh
+$ mise install
+$ incus-apply --version
+incus-apply version v0.1.2-sklein-draft
+git commit: 57ebccd3254818874456bdad107f7ae0ad4ee5f3
+build date: 2026-08-29T20:29:19Z
+```
+
+Here is the content of a file describing the configuration of a container and a QEMU VM I want to create with *incus-apply*:
+
+```sh
+$ cat test3.incus.yaml
+kind: instance
+name: test3-lxc
+image: images:fedora/44
+profiles:
+  - default
+devices:
+  volume1:
+    type: disk
+    source: ./volumes/volume1
+    path: /mnt/volume1
+---
+kind: instance
+name: test3-vm
+image: images:fedora/44
+vm: true
+profiles:
+  - default
+devices:
+  volume1:
+    type: disk
+    source: ./volumes/volume1
+    path: /mnt/volume1
+```
+
+```sh
+$ incus-apply test3.incus.yaml -y
+
+Found 2 resources in 1 file.
+
+The following actions would be performed:
+
+  create (2):
+    + instance/test3-lxc
+      └─ launch
+    + instance/test3-vm
+      └─ launch
+
+Summary: 2 to create.
++ instance/test3-lxc created
+  └─ started
++ instance/test3-vm created
+  └─ started
+
+Summary: 2 created.
+
+$ incus list
++-----------+---------+---------------------+------------------------------------------------+-----------------+-----------+
+|    NAME   |  STATE  |        IPv4         |                      IPv6                      |      TYPE       | SNAPSHOTS |
++-----------+---------+---------------------+------------------------------------------------+-----------------+-----------+
+| test3-lxc | RUNNING | 10.95.83.109 (eth0) | fd42:15b1:7fa2:bcd0:1266:6aff:fe26:967 (eth0)  | CONTAINER       | 0         |
++-----------+---------+---------------------+------------------------------------------------+-----------------+-----------+
+| test3-vm  | RUNNING |                     | fd42:15b1:7fa2:bcd0:1266:6aff:febb:5e5a (eth0) | VIRTUAL-MACHINE | 0         |
++-----------+---------+---------------------+------------------------------------------------+-----------------+-----------+
+```
+
+Let me verify the mount points are accessible:
+
+```sh
+$ incus exec test3-lxc -- ls /mnt/volume1/
+foobar.txt
+
+$ incus exec test3-vm -- ls /mnt/volume1/
+foobar.txt
+```
+
+*incus-apply* can also delete instances:
+
+```sh
+$ incus-apply -d test3.incus.yaml
+
+Found 2 resources in 1 file.
+
+The following actions would be performed:
+
+  delete (2):
+    - instance/test3-lxc
+    - instance/test3-vm
+
+Summary: 2 to delete.
+
+Proceed to delete these resources? [y/N]: y
+
+- instance/test3-lxc deleted
+- instance/test3-vm deleted
+
+Summary: 2 deleted, 0 skipped, 0 errors.
+```
+
+## Disk space used
+
+```sh
+$ incus list
++-----------+---------+-----------------------+--------------------------------------------------+-----------------+-----------+
+|    NAME   |  STATE  |         IPv4          |                       IPv6                       |      TYPE       | SNAPSHOTS |
++-----------+---------+-----------------------+--------------------------------------------------+-----------------+-----------+
+| test3-lxc | RUNNING | 10.95.83.109 (eth0)   | fd42:15b1:7fa2:bcd0:1266:6aff:fe26:967 (eth0)    | CONTAINER       | 0         |
++-----------+---------+-----------------------+--------------------------------------------------+-----------------+-----------+
+| test3-vm  | RUNNING | 10.95.83.145 (enp5s0) | fd42:15b1:7fa2:bcd0:1266:6aff:febb:5e5a (enp5s0) | VIRTUAL-MACHINE | 0         |
++-----------+---------+-----------------------+--------------------------------------------------+-----------------+-----------+
+
+$ mise run incus-btrfs-usage
+[incus-btrfs-usage] $ sudo bash scripts/incus-btrfs-usage.sh
+INSTANCE                     TYPE                         EXCLUSIVE       SHARED
+--------                     ----                         ---------       ------
+test3-lxc                    CONTAINER (LXC)             108.91MiB      501.94MiB
+test3-vm                     VIRTUAL-MACHINE (QEMU)      644.38MiB        1.18GiB
+
+Overall usage of pool 'default':
+       Total   Exclusive  Set shared  Filename
+     4.29GiB   753.91MiB     1.66GiB  /var/lib/incus/storage-pools/default
 ```
