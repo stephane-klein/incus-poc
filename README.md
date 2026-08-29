@@ -175,7 +175,7 @@ $ incus image list images: fedora/44
 ## Launching my first LXC Fedora container
 
 ```sh
-$ incus launch images:fedora/44 test1
+$ incus launch images:fedora/44/cloud test1
 Launching test1
 ```
 
@@ -288,7 +288,7 @@ $ incus list
 ## Launching my first Qemu Fedora VM
 
 ```sh
-$ incus launch images:fedora/44 test2 --vm
+$ incus launch images:fedora/44/cloud test2 --vm
 $ incus list
 +-------+---------+---------------------+--------------------------------------------------+-----------------+-------------+
 | NAME  |  STATE  |        IPv4         |                       IPv6                       |      TYPE       | SNAPSHOTS  |
@@ -391,7 +391,7 @@ Here is the content of a file describing the configuration of a container and a 
 $ cat test3.incus.yaml
 kind: instance
 name: test3-lxc
-image: images:fedora/44
+image: images:fedora/44/cloud
 profiles:
   - default
 devices:
@@ -402,7 +402,7 @@ devices:
 ---
 kind: instance
 name: test3-vm
-image: images:fedora/44
+image: images:fedora/44/cloud
 vm: true
 profiles:
   - default

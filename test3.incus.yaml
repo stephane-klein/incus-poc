@@ -1,6 +1,6 @@
 kind: instance
 name: test3-lxc
-image: images:fedora/44
+image: images:fedora/44/cloud
 profiles:
   - default
 devices:
@@ -11,7 +11,7 @@ devices:
 ---
 kind: instance
 name: test3-vm
-image: images:fedora/44
+image: images:fedora/44/cloud
 vm: true
 profiles:
   - default
