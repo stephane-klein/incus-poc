@@ -20,8 +20,8 @@ The driving motivation behind this POC is a likely future refactoring of [sklein
     - [ ] Disk space used by an LXC container
     - [ ] RAM usage of an LXC container
 - [ ] Tests to run on Incus in QEMU mode
-  - [ ] Launch a basic Fedora
-  - [ ] Test starting and stopping a QEMU VM
+  - [x] Launch a basic Fedora
+  - [x] Test starting and stopping a QEMU VM
   - [ ] Create a custom Fedora image
     - [ ] Test pushing and pulling this image
   - [ ] Test that mounting a host directory into the QEMU VM works
@@ -182,7 +182,7 @@ I can see the `test1` instance is up and running:
 ```sh
 $ incus list
 +-------+---------+--------------------+------------------------------------------------+-----------+-------------+
-|  NOM  |  ÉTAT   |        IPv4        |                      IPv6                      |   TYPE    | INSTANTANÉS |
+| NAME | STATE | IPv4 | IPv6 | TYPE | SNAPSHOTS |
 +-------+---------+--------------------+------------------------------------------------+-----------+-------------+
 | test1 | RUNNING | 10.95.83.57 (eth0) | fd42:15b1:7fa2:bcd0:1266:6aff:fe30:1516 (eth0) | CONTAINER | 0           |
 +-------+---------+--------------------+------------------------------------------------+-----------+-------------+
@@ -263,7 +263,7 @@ tmpfs                                                   16G     0   16G   0% /tm
 
 I'll stop the container:
 
-```
+```sh
 $ incus stop test1
 $ incus list
 +-------+---------+------+------+-----------+-------------+
@@ -275,10 +275,92 @@ $ incus list
 
 I'll delete the container:
 
-```
+```sh
 $ incus delete test1
 $ incus list
 +-----+------+------+------+------+-------------+
 | NOM | ÉTAT | IPv4 | IPv6 | TYPE | INSTANTANÉS |
 +-----+------+------+------+------+-------------+
+```
+
+## Launching my first Qemu Fedora VM
+
+```sh
+$ incus launch images:fedora/44 test2 --vm
+$ incus list
++-------+---------+---------------------+--------------------------------------------------+-----------------+-------------+
+| NAME  |  STATE  |        IPv4         |                       IPv6                       |      TYPE       | SNAPSHOTS  |
++-------+---------+---------------------+--------------------------------------------------+-----------------+-------------+
+| test2 | RUNNING | 10.95.83.7 (enp5s0) | fd42:15b1:7fa2:bcd0:1266:6aff:fefc:1588 (enp5s0) | VIRTUAL-MACHINE | 0           |
++-------+---------+---------------------+--------------------------------------------------+-----------------+-------------+
+$ incus exec test2 -- bash
+[root@fedora ~]# dnf update -y
+Updating and loading repositories:
+ Fedora 44 openh264 (From Cisco) - x86_64                                                                                                                                                                                                           100% |   2.0 KiB/s |   5.3 KiB |  00m03s
+ Fedora 44 - x86_64 - Updates                                                                                                                                                                                                                       100% |   2.7 MiB/s |  11.1 MiB |  00m04s
+ Fedora 44 - x86_64                                                                                                                                                                                                                                 100% |  12.3 MiB/s |  39.9 MiB |  00m03s
+Repositories loaded.
+Nothing to do.
+[root@fedora ~]# df -h
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda2       3.8G  1.3G  2.5G  35% /
+devtmpfs        384M     0  384M   0% /dev
+tmpfs           428M     0  428M   0% /dev/shm
+efivarfs         56K   46K  5.7K  89% /sys/firmware/efi/efivars
+tmpfs           171M  756K  171M   1% /run
+tmpfs           428M     0  428M   0% /tmp
+none            1.0M     0  1.0M   0% /run/credentials/systemd-journald.service
+none            1.0M     0  1.0M   0% /run/credentials/systemd-resolved.service
+none            1.0M     0  1.0M   0% /run/credentials/systemd-networkd.service
+/dev/sda1        99M  7.9M   91M   8% /boot/efi
+tmpfs            50M   19M   32M  37% /run/incus_agent
+none            1.0M     0  1.0M   0% /run/credentials/getty@tty1.service
+none            1.0M     0  1.0M   0% /run/credentials/serial-getty@ttyS0.service
+```
+
+```sh
+$ incus stop test2
+$ incus list
++-------+---------+------+------+-----------------+-------------+
+| NAME  |  STATE  | IPv4 | IPv6 |      TYPE       | SNAPSHOTS  |
++-------+---------+------+------+-----------------+-------------+
+| test2 | STOPPED |      |      | VIRTUAL-MACHINE | 0           |
++-------+---------+------+------+-----------------+-------------+
+$ incus start test2
+$ incus list
++-------+---------+-------------------+------------------------------------------------+-----------------+-------------+
+| NAME  |  STATE  |       IPv4        |                      IPv6                      |      TYPE       | SNAPSHOTS  |
++-------+---------+-------------------+------------------------------------------------+-----------------+-------------+
+| test2 | RUNNING | 10.95.83.7 (eth0) | fd42:15b1:7fa2:bcd0:1266:6aff:fefc:1588 (eth0) | VIRTUAL-MACHINE | 0           |
++-------+---------+-------------------+------------------------------------------------+-----------------+-------------+
+$ incus delete test2 --force
+$ incus list
++-----+------+------+------+------+-------------+
+| NOM | ÉTAT | IPv4 | IPv6 | TYPE | INSTANTANÉS |
++-----+------+------+------+------+-------------+
+```
+
+## Image management
+
+```sh
+$ incus image list
++-------+--------------+--------+----------------------------------+--------------+-----------------+-----------+-----------------------+
+| ALIAS | FINGERPRINT | PUBLIC |           DESCRIPTION            | ARCHITECTURE |      TYPE       |   SIZE    |  PUBLICATION DATE   |
++-------+--------------+--------+----------------------------------+--------------+-----------------+-----------+-----------------------+
+|       | 17d2b7249a1f | no     | Fedora 44 amd64 (20260828_20:33) | x86_64       | VIRTUAL-MACHINE | 754.63MiB | 2026/08/29 19:43 CEST |
++-------+--------------+--------+----------------------------------+--------------+-----------------+-----------+-----------------------+
+|       | 794d87e8de86 | no     | Fedora 44 amd64 (20260828_20:33) | x86_64       | CONTAINER       | 110.29MiB | 2026/08/29 19:11 CEST |
++-------+--------------+--------+----------------------------------+--------------+-----------------+-----------+-----------------------+
+```
+
+Deleting an image:
+
+```
+$ incus image delete 794d87e8de86
+$ incus image list
++-------+--------------+--------+----------------------------------+--------------+-----------------+-----------+-----------------------+
+| ALIAS | FINGERPRINT | PUBLIC |           DESCRIPTION            | ARCHITECTURE |      TYPE       |   SIZE    |  PUBLICATION DATE   |
++-------+--------------+--------+----------------------------------+--------------+-----------------+-----------+-----------------------+
+|       | 17d2b7249a1f | no     | Fedora 44 amd64 (20260828_20:33) | x86_64       | VIRTUAL-MACHINE | 754.63MiB | 2026/08/29 19:43 CEST |
++-------+--------------+--------+----------------------------------+--------------+-----------------+-----------+-----------------------+
 ```
