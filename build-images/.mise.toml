@@ -1,0 +1,34 @@
+[tools]
+"go:github.com/lxc/distrobuilder/v3/distrobuilder" = { version = "v3.3.2-0.20260811001855-e2c0bcd03815" }
+
+[tasks.build-lxc]
+description = "Build the Fedora LXC container image with distrobuilder"
+run = """
+sudo incus image delete fedora-44-sklein-container >/dev/null 2>&1 || true
+sudo systemd-run --scope --quiet \\
+  -p CPUQuota=200% \\
+  -p MemoryHigh=6G \\
+  -p MemoryMax=10G \\
+  -p IOWeight=1 \\
+  -- "$(mise which distrobuilder)" build-incus fedora.yaml dist-fedora-lxc \
+  --sources-dir .distrobuilder-sources \
+  --import-into-incus=fedora-44-sklein-container
+sudo chown -R $USER:$USER dist-fedora-lxc
+ls -lha dist-fedora-lxc/
+"""
+
+[tasks.build-vm]
+description = "Build the Fedora QEMU VM image with distrobuilder"
+run = """
+sudo incus image delete fedora-44-sklein-vm >/dev/null 2>&1 || true
+sudo systemd-run --scope --quiet \\
+  -p CPUQuota=200% \\
+  -p MemoryHigh=6G \\
+  -p MemoryMax=10G \\
+  -p IOWeight=1 \\
+  -- "$(mise which distrobuilder)" build-incus fedora.yaml dist-fedora-vm --vm \
+  --sources-dir .distrobuilder-sources \
+  --import-into-incus=fedora-44-sklein-vm
+sudo chown -R $USER:$USER dist-fedora-vm
+ls -lha dist-fedora-vm/
+"""

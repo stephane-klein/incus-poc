@@ -12,7 +12,7 @@ The driving motivation behind this POC is a likely future refactoring of [sklein
   - [x] Launch an LXC container with [incus-apply](https://incus-apply.abiosoft.com/)
   - [x] Test that mounting a host directory into the LXC container works
   - [x] Test SSH access to the LXC container
-  - [ ] Create a custom Fedora image with [distrobuilder](https://github.com/lxc/distrobuilder)
+  - [x] Create a custom Fedora image with [distrobuilder](https://github.com/lxc/distrobuilder)
     - [ ] Test pushing and pulling this image
   - [ ] Test installing and using Podman inside the LXC container
   - [ ] Test cloning an LXC container
@@ -27,7 +27,7 @@ The driving motivation behind this POC is a likely future refactoring of [sklein
   - [x] Launch a QEMU VM with [incus-apply](https://incus-apply.abiosoft.com/)
   - [x] Test that mounting a host directory into the QEMU VM works
   - [x] Test SSH access to the QEMU VM
-  - [ ] Create a custom Fedora image with [distrobuilder](https://github.com/lxc/distrobuilder)
+  - [x] Create a custom Fedora image with [distrobuilder](https://github.com/lxc/distrobuilder)
     - [ ] Test pushing and pulling this image
   - [ ] Test installing and using Podman inside the QEMU VM
   - [ ] Test cloning a QEMU VM
@@ -151,6 +151,8 @@ cluster: null
 
 ## List of available Fedora images
 
+Browse the official Incus images online: <https://images.linuxcontainers.org>.
+
 ```sh
 $ incus image list images: fedora/44
 +-----------------------------+--------------+--------+----------------------------------+--------------+-----------------+-----------+-----------------------+
@@ -173,6 +175,26 @@ $ incus image list images: fedora/44
 | fedora/44/cloud/arm64       | ddec5bf0fb94 | yes    | Fedora 44 arm64 (20260828_20:33) | aarch64      | CONTAINER       | 123.79MiB | 2026/08/28 02:00 CEST |
 +-----------------------------+--------------+--------+----------------------------------+--------------+-----------------+-----------+-----------------------+
 ```
+
+Here are the details of an image:
+
+```sh
+$ incus image show images:fedora/44/cloud
+auto_update: false
+properties:
+  architecture: amd64
+  description: Fedora 44 amd64 (20260829_20:33)
+  os: Fedora
+  release: "44"
+  serial: "20260829_20:33"
+  type: squashfs
+  variant: cloud
+public: true
+expires_at: 1970-01-01T00:00:00Z
+profiles: []
+```
+
+I notice the images are very up to date. Incus uses a publicly accessible Jenkins instance to build its images; here is the Fedora image job: <https://jenkins.linuxcontainers.org/job/image-fedora/>.
 
 ## Launching my first LXC Fedora container
 
@@ -570,4 +592,139 @@ test4-vm                     VIRTUAL-MACHINE (QEMU)      644.38MiB        1.18Gi
 Overall usage of pool 'default':
        Total   Exclusive  Set shared  Filename
      4.29GiB   753.91MiB     1.66GiB  /var/lib/incus/storage-pools/default
+```
+
+## Using Distrobuilder to create custom images
+
+### Installation
+
+I couldn't find a [distrobuilder](https://github.com/lxc/distrobuilder) package for Fedora: https://packages.fedoraproject.org/search?query=distrobuilder
+
+Here are the packages to install on Fedora:
+
+```sh
+$ sudo dnf install golang gcc debootstrap rsync gnupg2 squashfs-tools git make hivex genisoimage gpgme-devel btrfs-progs-devel umoci
+...
+```
+
+Then, I install *distrobuilder* with Mise:
+
+```sh
+$ mise install
+...
+$ distrobuilder --version
+3.3.1
+```
+
+### Creating a Fedora cloud image
+
+Description of the Fedora images to create: [`build-images/fedora.yaml`](build-images/fedora.yaml).  
+These images integrate `openssh-server` directly and start it.
+
+Creating an image for LXC container:
+
+```sh
+$ mise run //build-image-lxc/:build-lxc
+
+[...snip...]
+
+INFO   [2026-09-01T11:03:44+02:00] Removing cache directory
+total 132M
+drwxr-xr-x 1 stephane stephane   54  Sep  1 11:03 .
+drwxr-xr-x 1 stephane stephane  182  Sep  1 11:02 ..
+-rw-r--r-- 1 stephane stephane 1.4K  Sep  1 11:03 incus.tar.xz
+-rw-r--r-- 1 stephane stephane 132M  Sep  1 11:03 rootfs.squashfs
+```
+
+Creating an image for QEMU VM:
+
+```sh
+$ mise run //build-image-lxc/:build-vm
+
+[...snip...]
+
+INFO   [2026-09-01T11:40:04+02:00] Creating Incus image                          compression=xz type=split vm=true
+INFO   [2026-09-01T11:40:39+02:00] Removing cache directory
+total 808M
+drwxr-xr-x 1 stephane stephane   44  Sep  1 11:40 .
+drwxr-xr-x 1 stephane stephane  182  Sep  1 11:02 ..
+-rw-r--r-- 1 stephane stephane 810M  Sep  1 11:40 disk.qcow2
+-rw-r--r-- 1 stephane stephane 1.4K  Sep  1 11:40 incus.tar.xz
+```
+
+
+```sh
+$ incus-apply test5-custom-fedora-image.yaml
+
+Found 2 resources in 1 file.
+
+The following actions would be performed:
+
+  create (2):
+    + instance/test5-lxc
+      └─ launch, cloud-init
+    + instance/test5-vm
+      └─ launch, cloud-init
+
+Summary: 2 to create.
+
+Proceed to apply these changes? [y/N]: y
+
++ instance/test5-lxc created
+  └─ started
++ instance/test5-vm created
+  └─ started
+  └─ waiting for incus agent  ⠴
+```
+
+```sh
+$ incus list
++-----------+---------+----------------------+--------------------------------------------------+-----------------+-------------+
+|    NAME   |  STATE  |         IPv4         |                       IPv6                       |      TYPE       | SNAPSHOTS  |
++-----------+---------+----------------------+--------------------------------------------------+-----------------+-------------+
+| test5-lxc | RUNNING | 10.95.83.19 (eth0)   | fd42:15b1:7fa2:bcd0:1266:6aff:fe8f:db70 (eth0)   | CONTAINER       | 0           |
++-----------+---------+----------------------+--------------------------------------------------+-----------------+-------------+
+| test5-vm  | RUNNING | 10.95.83.87 (enp5s0) | fd42:15b1:7fa2:bcd0:1266:6aff:fe51:952b (enp5s0) | VIRTUAL-MACHINE | 0           |
++-----------+---------+----------------------+--------------------------------------------------+-----------------+-------------+
+```
+
+I connect to these instances via SSH:
+
+
+```sh
+$ ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR fedora@10.95.83.19
+[fedora@test5-lxc ~]$ uname --all
+Linux test5-lxc 7.1.10-100.fc43.x86_64 #1 SMP PREEMPT_DYNAMIC Sun Aug 23 16:26:01 UTC 2026 x86_64 GNU/Linux
+[fedora@test5-lxc ~]$ exit
+logout
+
+$ ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR fedora@10.95.83.87
+[fedora@test5-vm ~]$ uname --all
+Linux test5-vm 7.1.12-200.fc44.x86_64 #1 SMP PREEMPT_DYNAMIC Fri Aug 28 14:00:18 UTC 2026 x86_64 GNU/Linux
+[fedora@test5-vm ~]$
+```
+
+I can see cloud-init worked properly, and my SSH key is correctly installed.
+
+Destroying the instances:
+
+```sh
+$ incus-apply -d test5-custom-fedora-image.yaml
+
+Found 2 resources in 1 file.
+
+The following actions would be performed:
+
+  delete (2):
+    - instance/test5-lxc
+    - instance/test5-vm
+
+Summary: 2 to delete.
+
+Proceed to delete these resources? [y/N]: y
+
+- instance/test5-lxc deleted
+- instance/test5-vm deleted
+
+Summary: 2 deleted, 0 skipped, 0 errors.
 ```

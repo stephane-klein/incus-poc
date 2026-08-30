@@ -37,6 +37,41 @@ checksum = "sha256:33365c421d653ca2c6aae78512cd619c094dd26d2f5c61c87b92e1c75ae15
 url = "https://github.com/abiosoft/incus-apply/releases/download/v0.1.1/incus-apply-Darwin-x86_64"
 url_api = "https://api.github.com/repos/abiosoft/incus-apply/releases/assets/448306168"
 
+[[tools."github:lxc/distrobuilder"]]
+version = "3.3.1"
+backend = "github:lxc/distrobuilder"
+specifiers = ["3.3.1"]
+
+[tools."github:lxc/distrobuilder"."platforms.linux-arm64"]
+checksum = "sha256:6c411af7178bb55ef649c708f4f38fc3c30e6ecce901c08d8a389448a900a73a"
+url = "https://github.com/lxc/distrobuilder/releases/download/v3.3.1/distrobuilder-3.3.1.tar.gz"
+url_api = "https://api.github.com/repos/lxc/distrobuilder/releases/assets/361662475"
+
+[tools."github:lxc/distrobuilder"."platforms.linux-arm64-musl"]
+checksum = "sha256:6c411af7178bb55ef649c708f4f38fc3c30e6ecce901c08d8a389448a900a73a"
+url = "https://github.com/lxc/distrobuilder/releases/download/v3.3.1/distrobuilder-3.3.1.tar.gz"
+url_api = "https://api.github.com/repos/lxc/distrobuilder/releases/assets/361662475"
+
+[tools."github:lxc/distrobuilder"."platforms.linux-x64"]
+checksum = "sha256:6c411af7178bb55ef649c708f4f38fc3c30e6ecce901c08d8a389448a900a73a"
+url = "https://github.com/lxc/distrobuilder/releases/download/v3.3.1/distrobuilder-3.3.1.tar.gz"
+url_api = "https://api.github.com/repos/lxc/distrobuilder/releases/assets/361662475"
+
+[tools."github:lxc/distrobuilder"."platforms.linux-x64-musl"]
+checksum = "sha256:6c411af7178bb55ef649c708f4f38fc3c30e6ecce901c08d8a389448a900a73a"
+url = "https://github.com/lxc/distrobuilder/releases/download/v3.3.1/distrobuilder-3.3.1.tar.gz"
+url_api = "https://api.github.com/repos/lxc/distrobuilder/releases/assets/361662475"
+
+[tools."github:lxc/distrobuilder"."platforms.macos-arm64"]
+checksum = "sha256:6c411af7178bb55ef649c708f4f38fc3c30e6ecce901c08d8a389448a900a73a"
+url = "https://github.com/lxc/distrobuilder/releases/download/v3.3.1/distrobuilder-3.3.1.tar.gz"
+url_api = "https://api.github.com/repos/lxc/distrobuilder/releases/assets/361662475"
+
+[tools."github:lxc/distrobuilder"."platforms.macos-x64"]
+checksum = "sha256:6c411af7178bb55ef649c708f4f38fc3c30e6ecce901c08d8a389448a900a73a"
+url = "https://github.com/lxc/distrobuilder/releases/download/v3.3.1/distrobuilder-3.3.1.tar.gz"
+url_api = "https://api.github.com/repos/lxc/distrobuilder/releases/assets/361662475"
+
 [[tools."github:stephane-klein/incus-apply"]]
 version = "0.1.2-sklein-draft"
 backend = "github:stephane-klein/incus-apply"
@@ -71,3 +106,8 @@ url_api = "https://api.github.com/repos/stephane-klein/incus-apply/releases/asse
 checksum = "sha256:e441999cbff8dd804fb0062bae7fd29e1a73608c77ca115b677cbb3ed11f3051"
 url = "https://github.com/stephane-klein/incus-apply/releases/download/v0.1.2-sklein-draft/incus-apply-Darwin-x86_64"
 url_api = "https://api.github.com/repos/stephane-klein/incus-apply/releases/assets/535698067"
+
+[[tools."go:github.com/lxc/distrobuilder/v3/distrobuilder"]]
+version = "3.3.2-0.20260811001855-e2c0bcd03815"
+backend = "go:github.com/lxc/distrobuilder/v3/distrobuilder"
+specifiers = ["v3.3.2-0.20260811001855-e2c0bcd03815"]
