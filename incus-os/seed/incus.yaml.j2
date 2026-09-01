@@ -1,0 +1,9 @@
+apply_defaults: true
+preseed:
+  config:
+    core.https_address: ":443"
+  certificates:
+    - name: {{ ENV.CERT_NAME }}
+      type: client
+      certificate: |
+{{ ENV.CERT | indent(8, first=true) }}

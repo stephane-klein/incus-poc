@@ -2,7 +2,8 @@ monorepo_root = true
 
 [monorepo]
 config_roots = [
-    "build-images/"
+    "build-images/",
+    "incus-os/"
 ]
 
 [tools]

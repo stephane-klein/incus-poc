@@ -1,0 +1,7 @@
+*.img
+*.iso
+*.AppImage
+seed/incus.yaml
+seed/services.yaml
+seed/seed.tar
+*.sha256

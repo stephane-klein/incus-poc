@@ -728,3 +728,7 @@ Proceed to delete these resources? [y/N]: y
 
 Summary: 2 deleted, 0 skipped, 0 errors.
 ```
+
+## Installing IncusOS
+
+See [`./incus-os/`](./incus-os/).

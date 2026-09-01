@@ -1,0 +1,23 @@
+[tools]
+"github:mitsuhiko/minijinja" = { version = "2.24.0", bin = "minijinja-cli" }
+"go:github.com/lxc/incus-os/incus-osd/cmd/flasher-tool" = { version = "latest" }
+
+[tasks.create-netbird-setup-key]
+description = "Creates a NetBird setup key via the API and stores it in gopass"
+run = "bash scripts/create-netbird-setup-key.sh"
+
+[tasks.render-incus-seed]
+description = "Generates the final seed incus.yaml and services.yaml files in seed/ (for inspection)"
+run = "bash scripts/render-incus-seed.sh"
+
+[tasks.build-incusos-image]
+description = "Generates the custom IncusOS image (.img) with the local seed"
+run = "bash scripts/build-incusos-image.sh"
+
+[tasks.write-to-usb]
+description = "Writes the IncusOS image (.img) to a USB stick (interactive)"
+run = "bash scripts/write-to-usb-interactive.sh"
+
+[tasks.install-systemrescue]
+description = "Installs SystemRescue (bépo keyboard) on a USB stick (interactive)"
+run = "bash scripts/install-systemrescue.sh"
