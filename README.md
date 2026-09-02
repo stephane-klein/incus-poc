@@ -154,7 +154,7 @@ cluster: null
 Browse the official Incus images online: <https://images.linuxcontainers.org>.
 
 ```sh
-$ incus image list images: fedora/44
+$ incus image list images:fedora/44
 +-----------------------------+--------------+--------+----------------------------------+--------------+-----------------+-----------+-----------------------+
 |           ALIAS            | FINGERPRINT | PUBLIC |           DESCRIPTION            | ARCHITECTURE |      TYPE       |   SIZE    |    PUBLICATION DATE   |
 +-----------------------------+--------------+--------+----------------------------------+--------------+-----------------+-----------+-----------------------+
@@ -309,7 +309,7 @@ $ incus list
 +-----+------+------+------+------+-----------+
 ```
 
-## Launching my first Qemu Fedora VM
+## Launching my first QEMU Fedora VM
 
 ```sh
 $ incus launch images:fedora/44/cloud test2 --vm
@@ -425,6 +425,12 @@ $ ssh fedora@10.95.83.192
 [fedora@test3-lxc ~]$ exit
 ```
 
+I'll delete the container:
+
+```sh
+$ incus delete test3-lxc
+```
+
 ## Testing incus-apply
 
 Using [incus-apply](https://github.com/abiosoft/incus-apply), to launch instances from a declarative file.
@@ -435,7 +441,7 @@ Using [incus-apply](https://github.com/abiosoft/incus-apply), to launch instance
 
 I install *incus-apply* with [Mise](https://mise.jdx.dev/):
 
-```ssh
+```sh
 $ mise install
 $ incus-apply --version
 incus-apply version v0.1.2-sklein-draft
@@ -624,7 +630,7 @@ These images integrate `openssh-server` directly and start it.
 Build an image for LXC container:
 
 ```sh
-$ mise run //build-image-lxc/:build-lxc
+$ mise run //build-images:build-lxc
 
 [...snip...]
 
@@ -639,7 +645,7 @@ drwxr-xr-x 1 stephane stephane  182  Sep  1 11:02 ..
 Build an image for QEMU VM:
 
 ```sh
-$ mise run //build-image-lxc/:build-vm
+$ mise run //build-images:build-vm
 
 [...snip...]
 
@@ -656,7 +662,7 @@ drwxr-xr-x 1 stephane stephane  182  Sep  1 11:02 ..
 
 
 I use a Mise task to prepare the `test5-custom-fedora-image.yaml` file from the template [`./test5-custom-fedora-image.yaml.j2`](./test5-custom-fedora-image.yaml.j2).  
-I use a template because the file embeds my Netbird key — a secret that lets newly created instances automatically enroll in an Incus group I created [here](https://github.com/stephane-klein/homelab.sklein.xyz/blob/bb6bfa27aa523d7818f32640d5a235b43c3810a3/README.md?plain=1#L163).
+I use a template because the file embeds my Netbird key — a secret that lets newly created instances automatically enroll in the `incus` NetBird group I created [here](https://github.com/stephane-klein/homelab.sklein.xyz/blob/bb6bfa27aa523d7818f32640d5a235b43c3810a3/README.md?plain=1#L163).
 
 ```sh
 $ mise run //:render-test5-custom-fedora-image-yaml
