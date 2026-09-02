@@ -72,6 +72,77 @@ checksum = "sha256:6c411af7178bb55ef649c708f4f38fc3c30e6ecce901c08d8a389448a900a
 url = "https://github.com/lxc/distrobuilder/releases/download/v3.3.1/distrobuilder-3.3.1.tar.gz"
 url_api = "https://api.github.com/repos/lxc/distrobuilder/releases/assets/361662475"
 
+[[tools."github:mitsuhiko/minijinja"]]
+version = "2.24.0"
+backend = "github:mitsuhiko/minijinja"
+specifiers = ["2.24.0"]
+
+[tools."github:mitsuhiko/minijinja"."platforms.linux-arm64"]
+checksum = "sha256:b60f741e4101c0701a22a1115b2295fd8e4ae13cdffc0ebf4d1821d876e93347"
+url = "https://github.com/mitsuhiko/minijinja/releases/download/2.24.0/minijinja-cli-aarch64-unknown-linux-gnu.tar.xz"
+url_api = "https://api.github.com/repos/mitsuhiko/minijinja/releases/assets/511868827"
+
+[tools."github:mitsuhiko/minijinja"."platforms.linux-arm64-musl"]
+checksum = "sha256:5fd4d0ca9a37973564a9ba3d4444466dbca46c4737840b772ba64729cac4277b"
+url = "https://github.com/mitsuhiko/minijinja/releases/download/2.24.0/minijinja-cli-aarch64-unknown-linux-musl.tar.xz"
+url_api = "https://api.github.com/repos/mitsuhiko/minijinja/releases/assets/511868829"
+
+[tools."github:mitsuhiko/minijinja"."platforms.linux-x64"]
+checksum = "sha256:04651ea786eee8e6d5311caf96e01874d984ff72f3d3d91c2195851f0b414580"
+url = "https://github.com/mitsuhiko/minijinja/releases/download/2.24.0/minijinja-cli-x86_64-unknown-linux-gnu.tar.xz"
+url_api = "https://api.github.com/repos/mitsuhiko/minijinja/releases/assets/511868860"
+
+[tools."github:mitsuhiko/minijinja"."platforms.linux-x64-musl"]
+checksum = "sha256:40a7b36eb04075d54f0e079cbf632d2fcf9cc32721539f6b799341632d16f50e"
+url = "https://github.com/mitsuhiko/minijinja/releases/download/2.24.0/minijinja-cli-x86_64-unknown-linux-musl.tar.xz"
+url_api = "https://api.github.com/repos/mitsuhiko/minijinja/releases/assets/511868866"
+
+[tools."github:mitsuhiko/minijinja"."platforms.macos-arm64"]
+checksum = "sha256:a0f1525bcac485a80313cec7e835ed03335bd55bc14dc5cf070c7eb9789d9905"
+url = "https://github.com/mitsuhiko/minijinja/releases/download/2.24.0/minijinja-cli-aarch64-apple-darwin.tar.xz"
+url_api = "https://api.github.com/repos/mitsuhiko/minijinja/releases/assets/511868818"
+
+[tools."github:mitsuhiko/minijinja"."platforms.macos-x64"]
+checksum = "sha256:283d3e54ed52ff0f97bc4e8b736fa67d5f1bc55b47457ffc8e9310a5fe555997"
+url = "https://github.com/mitsuhiko/minijinja/releases/download/2.24.0/minijinja-cli-x86_64-apple-darwin.tar.xz"
+url_api = "https://api.github.com/repos/mitsuhiko/minijinja/releases/assets/511868854"
+
+[[tools."github:nidor1998/s7cmd"]]
+version = "1.8.2"
+backend = "github:nidor1998/s7cmd"
+specifiers = ["v1.8.2"]
+
+[tools."github:nidor1998/s7cmd"."platforms.linux-arm64"]
+checksum = "sha256:5f4a565585c7660743dd512e0dc9e2ab4291e16211ec618b4ddb577a05feb9ba"
+url = "https://github.com/nidor1998/s7cmd/releases/download/v1.8.2/s7cmd-1.8.2-linux-musl-aarch64.tar.gz"
+url_api = "https://api.github.com/repos/nidor1998/s7cmd/releases/assets/524527683"
+provenance = "github-attestations"
+
+[tools."github:nidor1998/s7cmd"."platforms.linux-arm64-musl"]
+checksum = "sha256:5f4a565585c7660743dd512e0dc9e2ab4291e16211ec618b4ddb577a05feb9ba"
+url = "https://github.com/nidor1998/s7cmd/releases/download/v1.8.2/s7cmd-1.8.2-linux-musl-aarch64.tar.gz"
+url_api = "https://api.github.com/repos/nidor1998/s7cmd/releases/assets/524527683"
+provenance = "github-attestations"
+
+[tools."github:nidor1998/s7cmd"."platforms.linux-x64"]
+checksum = "sha256:c22118114a3ac630f00b4feb3793f877a12f3a9043f9feda57cb0536498a4581"
+url = "https://github.com/nidor1998/s7cmd/releases/download/v1.8.2/s7cmd-1.8.2-linux-musl-x86_64.tar.gz"
+url_api = "https://api.github.com/repos/nidor1998/s7cmd/releases/assets/524526934"
+provenance = "github-attestations"
+provenance_verified = true
+
+[tools."github:nidor1998/s7cmd"."platforms.linux-x64-musl"]
+checksum = "sha256:c22118114a3ac630f00b4feb3793f877a12f3a9043f9feda57cb0536498a4581"
+url = "https://github.com/nidor1998/s7cmd/releases/download/v1.8.2/s7cmd-1.8.2-linux-musl-x86_64.tar.gz"
+url_api = "https://api.github.com/repos/nidor1998/s7cmd/releases/assets/524526934"
+provenance = "github-attestations"
+
+[tools."github:nidor1998/s7cmd"."platforms.macos-arm64"]
+checksum = "sha256:f22363207d111f54f71d53b78fa284be537c863baee672b0eee4b46d8c62d259"
+url = "https://github.com/nidor1998/s7cmd/releases/download/v1.8.2/s7cmd-1.8.2-macos-aarch64.tar.gz"
+url_api = "https://api.github.com/repos/nidor1998/s7cmd/releases/assets/524532440"
+provenance = "github-attestations"
+
 [[tools."github:stephane-klein/incus-apply"]]
 version = "0.1.2-sklein-draft"
 backend = "github:stephane-klein/incus-apply"

@@ -23,6 +23,7 @@ run = "bash scripts/render-test5-custom-fedora-image.yaml.sh"
 
 [tasks.apply-test5]
 description = "Purge les peers NetBird obsolètes de test5 puis applique test5-custom-fedora-image.yaml avec incus-apply"
+depends = ["render-test5-custom-fedora-image-yaml"]
 run = """
 set -euo pipefail
 

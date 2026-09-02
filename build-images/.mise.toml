@@ -1,5 +1,7 @@
 [tools]
 "go:github.com/lxc/distrobuilder/v3/distrobuilder" = { version = "v3.3.2-0.20260811001855-e2c0bcd03815" }
+"github:lxc/incus" = { version = "v7.4.0", matching = "incus-simplestreams", bin = "incus-simplestreams" }
+"github:rclone/rclone" = { version = "v1.75.0" }
 
 [tasks.build-lxc]
 description = "Build the Fedora LXC container image with distrobuilder"
@@ -10,7 +12,7 @@ sudo systemd-run --scope --quiet \\
   -p MemoryHigh=6G \\
   -p MemoryMax=10G \\
   -p IOWeight=1 \\
-  -- "$(mise which distrobuilder)" build-incus fedora.yaml dist-fedora-lxc \
+  -- distrobuilder build-incus fedora.yaml dist-fedora-lxc \
   --sources-dir .distrobuilder-sources \
   --import-into-incus=fedora-44-sklein-container
 sudo chown -R $USER:$USER dist-fedora-lxc
@@ -26,9 +28,42 @@ sudo systemd-run --scope --quiet \\
   -p MemoryHigh=6G \\
   -p MemoryMax=10G \\
   -p IOWeight=1 \\
-  -- "$(mise which distrobuilder)" build-incus fedora.yaml dist-fedora-vm --vm \
+-- distrobuilder build-incus fedora.yaml dist-fedora-vm --vm \\
   --sources-dir .distrobuilder-sources \
   --import-into-incus=fedora-44-sklein-vm
 sudo chown -R $USER:$USER dist-fedora-vm
 ls -lha dist-fedora-vm/
+"""
+
+[tasks.upload-images]
+description = "Generates the simplestreams index and publishes the Fedora LXC + VM images to the Scaleway S3 incus-images bucket"
+quiet = true
+run = """
+set -euo pipefail
+
+for f in \\
+  dist-fedora-lxc/incus.tar.xz \\
+  dist-fedora-lxc/rootfs.squashfs \\
+  dist-fedora-vm/incus.tar.xz \\
+  dist-fedora-vm/disk.qcow2; do
+  test -f "$f" || { echo "ERROR: missing $f (run build-lxc / build-vm first)" >&2; exit 1; }
+done
+
+rm -rf .simplestreams && mkdir -p .simplestreams
+(
+  cd .simplestreams
+  incus-simplestreams add --alias fedora-44-sklein ../dist-fedora-lxc/incus.tar.xz ../dist-fedora-lxc/rootfs.squashfs
+  incus-simplestreams add ../dist-fedora-vm/incus.tar.xz ../dist-fedora-vm/disk.qcow2
+)
+
+export RCLONE_S3_ACCESS_KEY_ID="$(gopass show -o homelab/incus-images/SCW_ACCESS_KEY)"
+export RCLONE_S3_SECRET_ACCESS_KEY="$(gopass show -o homelab/incus-images/SCW_SECRET_KEY)"
+
+rclone sync .simplestreams/ :s3:incus-images \
+  --s3-provider Scaleway \
+  --s3-endpoint https://s3.fr-par.scw.cloud \
+  --s3-region fr-par \
+  --s3-acl public-read \
+  --log-level ERROR \
+  --progress
 """

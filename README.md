@@ -13,7 +13,7 @@ The driving motivation behind this POC is a likely future refactoring of [sklein
   - [x] Test that mounting a host directory into the LXC container works
   - [x] Test SSH access to the LXC container
   - [x] Create a custom Fedora image with [distrobuilder](https://github.com/lxc/distrobuilder)
-    - [ ] Test pushing and pulling this image
+    - [x] Test pushing and pulling this image (see in [`./build-images/`](./build-images/))
   - [x] Test installing and using Podman inside the LXC container
   - [ ] Test cloning an LXC container
   - [x] Test setup Netbird installation and configuration
@@ -28,7 +28,7 @@ The driving motivation behind this POC is a likely future refactoring of [sklein
   - [x] Test that mounting a host directory into the QEMU VM works
   - [x] Test SSH access to the QEMU VM
   - [x] Create a custom Fedora image with [distrobuilder](https://github.com/lxc/distrobuilder)
-    - [ ] Test pushing and pulling this image
+    - [x] Test pushing and pulling this image (see in [`./build-images/`](./build-images/))
   - [x] Test installing and using Podman inside the QEMU VM
   - [ ] Test cloning a QEMU VM
   - [x] Test setup Netbird installation and configuration
