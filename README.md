@@ -14,7 +14,7 @@ The driving motivation behind this POC is a likely future refactoring of [sklein
   - [x] Test SSH access to the LXC container
   - [x] Create a custom Fedora image with [distrobuilder](https://github.com/lxc/distrobuilder)
     - [ ] Test pushing and pulling this image
-  - [ ] Test installing and using Podman inside the LXC container
+  - [x] Test installing and using Podman inside the LXC container
   - [ ] Test cloning an LXC container
   - [x] Test setup Netbird installation and configuration
   - [ ] Create a script to measure
@@ -29,7 +29,7 @@ The driving motivation behind this POC is a likely future refactoring of [sklein
   - [x] Test SSH access to the QEMU VM
   - [x] Create a custom Fedora image with [distrobuilder](https://github.com/lxc/distrobuilder)
     - [ ] Test pushing and pulling this image
-  - [ ] Test installing and using Podman inside the QEMU VM
+  - [x] Test installing and using Podman inside the QEMU VM
   - [ ] Test cloning a QEMU VM
   - [x] Test setup Netbird installation and configuration
   - [ ] Create a script to measure
@@ -652,10 +652,13 @@ drwxr-xr-x 1 stephane stephane  182  Sep  1 11:02 ..
 -rw-r--r-- 1 stephane stephane 1.4K  Sep  1 11:40 incus.tar.xz
 ```
 
+## Create instance with Netbird enrolement
+
+
 I use a Mise task to prepare the `test5-custom-fedora-image.yaml` file from the template [`./test5-custom-fedora-image.yaml.j2`](./test5-custom-fedora-image.yaml.j2).  
 I use a template because the file embeds my Netbird key — a secret that lets newly created instances automatically enroll in an Incus group I created [here](https://github.com/stephane-klein/homelab.sklein.xyz/blob/bb6bfa27aa523d7818f32640d5a235b43c3810a3/README.md?plain=1#L163).
 
-```
+```sh
 $ mise run //:render-test5-custom-fedora-image-yaml
 ```
 
@@ -711,17 +714,51 @@ Linux test5-vm 7.1.12-200.fc44.x86_64 #1 SMP PREEMPT_DYNAMIC Fri Aug 28 14:00:18
 
 I can see cloud-init worked properly, and my SSH key is correctly installed.
 
+### Podman is installed and ready to use
+
 Since these cloud-init configurations enroll the instances in my Netbird network, I can also connect to them using:
 
 ```sh
-$ ssh fedora@test5-lxc
+$ ssh fedora@test5-lxc.homelab.stephane-klein.info # or ssh fedora@test5-lxc
+[fedora@test5-lxc ~]$ podman run -d -p 8080:80 --name whoami docker.io/traefik/whoami
 ...
-$ ssh fedora@test5-lxc.homelab.stephane-klein.info
+[fedora@test5-lxc ~]$ exit
+$ ssh fedora@test5-vm.homelab.stephane-klein.info # or ssh fedora@test5-vm
+[fedora@test5-vm ~]$ podman run -d -p 8080:80 --name whoami docker.io/traefik/whoami
 ...
-$ ssh fedora@test5-vm
-...
-$ ssh fedora@test5-vm.homelab.stephane-klein.info
-...
+[fedora@test5-vm ~]$ exit
+```
+
+In this example, a [`whoami`](https://hub.docker.com/r/traefik/whoami) container is started and is accessible via the VPN hostnames of the instances:
+
+```sh
+$ curl http://test5-lxc.homelab.stephane-klein.info:8080
+Hostname: a6782f4fe689
+IP: 127.0.0.1
+IP: ::1
+IP: 10.95.83.52
+IP: fd42:15b1:7fa2:bcd0:1266:6aff:fe6d:d77c
+IP: fe80::6ccb:57ff:fed5:f79e
+RemoteAddr: [fd0e:5069:2174:137b:7db2:51cb:33f7:339]:46934
+GET / HTTP/1.1
+Host: test5-lxc.homelab.stephane-klein.info:8080
+User-Agent: curl/8.15.0
+Accept: */*
+```
+
+```sh
+$ curl http://test5-vm.homelab.stephane-klein.info:8080
+Hostname: 7e9845b445b8
+IP: 127.0.0.1
+IP: ::1
+IP: 10.95.83.210
+IP: fd42:15b1:7fa2:bcd0:1266:6aff:fea0:2d25
+IP: fe80::1427:b8ff:fedd:d65f
+RemoteAddr: [fd0e:5069:2174:137b:7db2:51cb:33f7:339]:60348
+GET / HTTP/1.1
+Host: test5-vm.homelab.stephane-klein.info:8080
+User-Agent: curl/8.15.0
+Accept: */*
 ```
 
 Destroying the instances:
@@ -746,8 +783,6 @@ Proceed to delete these resources? [y/N]: y
 
 Summary: 2 deleted, 0 skipped, 0 errors.
 ```
-
-
 
 ## Installing IncusOS
 

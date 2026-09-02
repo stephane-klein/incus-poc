@@ -293,6 +293,17 @@ packages:
     - "--setopt=tsflags=noscripts"
 
   - packages:
+    - podman
+    - podman-compose
+    action: install
+
+  - packages:
+    - cloud-init
+    action: install
+    variants:
+    - cloud
+
+  - packages:
     - cloud-utils-growpart
     action: install
     types:
@@ -424,6 +435,15 @@ actions:
     useradd --user-group --create-home --shell /bin/bash fedora
     echo "fedora ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/fedora
     passwd -l root
+
+- trigger: post-packages
+  action: |-
+    #!/bin/sh
+    set -eux
+
+    # newuidmap/newgidmap must be setuid root for rootless podman to be able
+    # to write the uid_map/gid_map of its nested user namespace.
+    chmod u+s /usr/bin/newuidmap /usr/bin/newgidmap
 
 - trigger: post-packages
   action: |-
