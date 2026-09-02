@@ -16,7 +16,7 @@ The driving motivation behind this POC is a likely future refactoring of [sklein
     - [ ] Test pushing and pulling this image
   - [ ] Test installing and using Podman inside the LXC container
   - [ ] Test cloning an LXC container
-  - [ ] Test setup Netbird installation and configuration
+  - [x] Test setup Netbird installation and configuration
   - [ ] Create a script to measure
     - [ ] LXC container startup time
     - [x] Disk space used by an LXC container
@@ -31,7 +31,7 @@ The driving motivation behind this POC is a likely future refactoring of [sklein
     - [ ] Test pushing and pulling this image
   - [ ] Test installing and using Podman inside the QEMU VM
   - [ ] Test cloning a QEMU VM
-  - [ ] Test setup Netbird installation and configuration
+  - [x] Test setup Netbird installation and configuration
   - [ ] Create a script to measure
     - [ ] QEMU VM startup time
     - [x] Disk space used by a QEMU VM
@@ -621,7 +621,7 @@ $ distrobuilder --version
 Description of the Fedora images to create: [`build-images/fedora.yaml`](build-images/fedora.yaml).  
 These images integrate `openssh-server` directly and start it.
 
-Creating an image for LXC container:
+Build an image for LXC container:
 
 ```sh
 $ mise run //build-image-lxc/:build-lxc
@@ -636,7 +636,7 @@ drwxr-xr-x 1 stephane stephane  182  Sep  1 11:02 ..
 -rw-r--r-- 1 stephane stephane 132M  Sep  1 11:03 rootfs.squashfs
 ```
 
-Creating an image for QEMU VM:
+Build an image for QEMU VM:
 
 ```sh
 $ mise run //build-image-lxc/:build-vm
@@ -652,6 +652,12 @@ drwxr-xr-x 1 stephane stephane  182  Sep  1 11:02 ..
 -rw-r--r-- 1 stephane stephane 1.4K  Sep  1 11:40 incus.tar.xz
 ```
 
+I use a Mise task to prepare the `test5-custom-fedora-image.yaml` file from the template [`./test5-custom-fedora-image.yaml.j2`](./test5-custom-fedora-image.yaml.j2).  
+I use a template because the file embeds my Netbird key — a secret that lets newly created instances automatically enroll in an Incus group I created [here](https://github.com/stephane-klein/homelab.sklein.xyz/blob/bb6bfa27aa523d7818f32640d5a235b43c3810a3/README.md?plain=1#L163).
+
+```
+$ mise run //:render-test5-custom-fedora-image-yaml
+```
 
 ```sh
 $ incus-apply test5-custom-fedora-image.yaml
@@ -690,7 +696,6 @@ $ incus list
 
 I connect to these instances via SSH:
 
-
 ```sh
 $ ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR fedora@10.95.83.19
 [fedora@test5-lxc ~]$ uname --all
@@ -705,6 +710,19 @@ Linux test5-vm 7.1.12-200.fc44.x86_64 #1 SMP PREEMPT_DYNAMIC Fri Aug 28 14:00:18
 ```
 
 I can see cloud-init worked properly, and my SSH key is correctly installed.
+
+Since these cloud-init configurations enroll the instances in my Netbird network, I can also connect to them using:
+
+```sh
+$ ssh fedora@test5-lxc
+...
+$ ssh fedora@test5-lxc.homelab.stephane-klein.info
+...
+$ ssh fedora@test5-vm
+...
+$ ssh fedora@test5-vm.homelab.stephane-klein.info
+...
+```
 
 Destroying the instances:
 
@@ -728,6 +746,8 @@ Proceed to delete these resources? [y/N]: y
 
 Summary: 2 deleted, 0 skipped, 0 errors.
 ```
+
+
 
 ## Installing IncusOS
 

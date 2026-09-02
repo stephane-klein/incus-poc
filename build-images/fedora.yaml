@@ -137,6 +137,73 @@ files:
   types:
   - vm
 
+- path: /usr/local/sbin/enroll-netbird.sh
+  generator: dump
+  content: |-
+    #!/bin/sh
+    set -eu
+
+    # Enroll the instance into NetBird if a setup key is provided.
+    # Usage: enroll-netbird.sh <setup-key-file>
+    # The setup key is read by netbird itself from the file (--setup-key-file).
+    # With an empty or missing file, this is a no-op.
+    KEY_FILE="${1:-}"
+
+    # No-op when no key file is provided, or it does not exist or is empty.
+    if [ -z "${KEY_FILE}" ] || [ ! -s "${KEY_FILE}" ]; then
+      exit 0
+    fi
+
+    # Remove the setup key file on exit, whether enrollment succeeds or not.
+    trap 'rm -f "${KEY_FILE}"' EXIT
+
+    # The netbird daemon is not part of the image (the RPM %post that installs
+    # the service is skipped at build time with tsflags=noscripts), so install
+    # and start it here, at runtime, where systemd is running.
+    export HOME=/root
+    export XDG_CONFIG_HOME=/root/.config
+
+    netbird service install || true
+    netbird service start || true
+
+    # Wait for the daemon socket to appear.
+    SOCKET=""
+    i=0
+    while [ -z "${SOCKET}" ] && [ "${i}" -lt 30 ]; do
+      if [ -S /var/run/netbird.sock ]; then
+        SOCKET=/var/run/netbird.sock
+      else
+        for f in /var/run/netbird/*.sock; do
+          if [ -S "${f}" ]; then
+            SOCKET="${f}"
+            break
+          fi
+        done
+      fi
+      [ -z "${SOCKET}" ] && sleep 1
+      i=$((i + 1))
+    done
+
+    [ -n "${SOCKET}" ] || {
+      echo "enroll-netbird.sh: netbird daemon socket not found" >&2
+      exit 1
+    }
+
+    # Bring the interface up. Retry a few times as the daemon may still be
+    # settling. The setup key is read by netbird from the file. Failing to
+    # enroll is a hard error (blocking cloud-init).
+    attempt=0
+    while ! netbird up --daemon-addr "unix://${SOCKET}" --setup-key-file "${KEY_FILE}"; do
+      attempt=$((attempt + 1))
+      if [ "${attempt}" -ge 5 ]; then
+        echo "enroll-netbird.sh: netbird up failed after ${attempt} attempts" >&2
+        exit 1
+      fi
+      sleep 5
+    done
+
+    exit 0
+
 - name: meta-data
   generator: cloud-init
   variants:
@@ -175,6 +242,16 @@ packages:
   manager: dnf
   update: true
   cleanup: true
+  repositories:
+  - name: netbird
+    url: |-
+      [netbird]
+      name=netbird
+      baseurl=https://pkgs.netbird.io/yum/
+      enabled=1
+      gpgcheck=1
+      gpgkey=https://pkgs.netbird.io/yum/repodata/repomd.xml.key
+      repo_gpgcheck=1
   sets:
   - packages:
     - cpio
@@ -208,6 +285,12 @@ packages:
     action: install
     variants:
     - cloud
+
+  - packages:
+    - netbird
+    action: install
+    flags:
+    - "--setopt=tsflags=noscripts"
 
   - packages:
     - cloud-utils-growpart

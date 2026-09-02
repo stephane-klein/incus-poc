@@ -8,7 +8,12 @@ config_roots = [
 
 [tools]
 "github:stephane-klein/incus-apply" = { version = "v0.1.2-sklein-draft", bin = "incus-apply" }
+"github:mitsuhiko/minijinja" = { version = "2.24.0", bin = "minijinja-cli" }
 
 [tasks.incus-btrfs-usage]
 description = "Affiche l'espace disque btrfs exclusif par instance incus (LXC + QEMU)"
 run = "sudo bash scripts/incus-btrfs-usage.sh"
+
+[tasks.render-test5-custom-fedora-image-yaml]
+description = "Renders test5-custom-fedora-image.yaml from the .j2 template, injecting the NetBird auto-group setup key"
+run = "bash scripts/render-test5-custom-fedora-image.yaml.sh"

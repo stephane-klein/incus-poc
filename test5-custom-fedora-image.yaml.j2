@@ -9,8 +9,19 @@ devices:
     source: ./volumes/volume1
     path: /mnt/volume1
 config:
+  security.nesting: "true"
   cloud-init.user-data: |
     #cloud-config
+    hostname: test5-lxc
+    fqdn: test5-lxc.homelab.stephane-klein.info
+    prefer_fqdn_over_hostname: true
+    create_hostname_file: true
+    write_files:
+      - path: /tmp/netbird-setup-key
+        content: {{ ENV.NETBIRD_SETUP_KEY }}
+        permissions: "0600"
+    runcmd:
+      - [bash, /usr/local/sbin/enroll-netbird.sh, /tmp/netbird-setup-key]
     users:
       - name: fedora
         ssh_authorized_keys:
@@ -30,6 +41,16 @@ devices:
 config:
   cloud-init.user-data: |
     #cloud-config
+    hostname: test5-vm
+    fqdn: test5-vm.homelab.stephane-klein.info
+    prefer_fqdn_over_hostname: true
+    create_hostname_file: true
+    write_files:
+      - path: /tmp/netbird-setup-key
+        content: {{ ENV.NETBIRD_SETUP_KEY }}
+        permissions: "0600"
+    runcmd:
+      - [bash, /usr/local/sbin/enroll-netbird.sh, /tmp/netbird-setup-key]
     users:
       - name: fedora
         ssh_authorized_keys:
