@@ -10,6 +10,9 @@ config_roots = [
 "github:stephane-klein/incus-apply" = { version = "v0.1.2-sklein-draft", bin = "incus-apply" }
 "github:mitsuhiko/minijinja" = { version = "2.24.0", bin = "minijinja-cli" }
 
+[shell_alias]
+ssh = "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR"
+
 [tasks.incus-btrfs-usage]
 description = "Affiche l'espace disque btrfs exclusif par instance incus (LXC + QEMU)"
 run = "sudo bash scripts/incus-btrfs-usage.sh"

@@ -697,13 +697,13 @@ $ incus list
 I connect to these instances via SSH:
 
 ```sh
-$ ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR fedora@10.95.83.19
+$ ssh fedora@10.95.83.19
 [fedora@test5-lxc ~]$ uname --all
 Linux test5-lxc 7.1.10-100.fc43.x86_64 #1 SMP PREEMPT_DYNAMIC Sun Aug 23 16:26:01 UTC 2026 x86_64 GNU/Linux
 [fedora@test5-lxc ~]$ exit
 logout
 
-$ ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR fedora@10.95.83.87
+$ ssh fedora@10.95.83.87
 [fedora@test5-vm ~]$ uname --all
 Linux test5-vm 7.1.12-200.fc44.x86_64 #1 SMP PREEMPT_DYNAMIC Fri Aug 28 14:00:18 UTC 2026 x86_64 GNU/Linux
 [fedora@test5-vm ~]$
