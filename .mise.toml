@@ -20,3 +20,23 @@ run = "sudo bash scripts/incus-btrfs-usage.sh"
 [tasks.render-test5-custom-fedora-image-yaml]
 description = "Renders test5-custom-fedora-image.yaml from the .j2 template, injecting the NetBird auto-group setup key"
 run = "bash scripts/render-test5-custom-fedora-image.yaml.sh"
+
+[tasks.apply-test5]
+description = "Purge les peers NetBird obsolètes de test5 puis applique test5-custom-fedora-image.yaml avec incus-apply"
+run = """
+set -euo pipefail
+
+bash scripts/purge-netbird-peers.sh test5-custom-fedora-image.yaml
+
+incus-apply test5-custom-fedora-image.yaml
+"""
+
+[tasks.delete-test5]
+description = "Supprime les instances test5 (incus-apply -d) puis purge leurs peers NetBird"
+run = """
+set -euo pipefail
+
+incus-apply -d test5-custom-fedora-image.yaml
+
+bash scripts/purge-netbird-peers.sh test5-custom-fedora-image.yaml
+"""
