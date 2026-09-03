@@ -94,6 +94,12 @@ For reasons I don't understand, the IncusOS installer on a USB stick won't start
 The only solution I found is to install [SystemRescue](https://www.system-rescue.org/) (`mise run :install-systemrescue`) on a second USB stick, boot into *SystemRescue* and delete every partition on the NVMe drive using [GParted](https://gparted.org/).  
 After this cleanup, the IncusOS installer works again.
 
-## WIP
+## Current status
 
-The IncusOS installation process is still a work in progress.
+IncusOS is now successfully installed on the Tuxedo laptop and is being used as a server.
+
+There is currently one blocking issue: the screen cannot be turned off or put to sleep, so it stays lit permanently (even with the lid closed), which is problematic for a headless server running on a laptop.
+
+This is tracked upstream in the issue [Implement a power management API](https://github.com/lxc/incus-os/issues/502).
+
+In the meantime, to get more flexibility (notably the ability to turn the screen off), I plan to run Incus on a Fedora CoreOS system instead (see [`../incus-in-coreos-server/`](../incus-in-coreos-server/)).

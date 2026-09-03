@@ -15,7 +15,6 @@ The driving motivation behind this POC is a likely future refactoring of [sklein
   - [x] Create a custom Fedora image with [distrobuilder](https://github.com/lxc/distrobuilder)
     - [x] Test pushing and pulling this image (see in [`./build-images/`](./build-images/))
   - [x] Test installing and using Podman inside the LXC container
-  - [ ] Test cloning an LXC container
   - [x] Test setup Netbird installation and configuration
   - [ ] Create a script to measure
     - [ ] LXC container startup time
@@ -30,13 +29,13 @@ The driving motivation behind this POC is a likely future refactoring of [sklein
   - [x] Create a custom Fedora image with [distrobuilder](https://github.com/lxc/distrobuilder)
     - [x] Test pushing and pulling this image (see in [`./build-images/`](./build-images/))
   - [x] Test installing and using Podman inside the QEMU VM
-  - [ ] Test cloning a QEMU VM
   - [x] Test setup Netbird installation and configuration
   - [ ] Create a script to measure
     - [ ] QEMU VM startup time
     - [x] Disk space used by a QEMU VM
     - [ ] RAM usage of a QEMU VM
 - [ ] Test [IncusOS](https://linuxcontainers.org/incus-os/introduction/) by installing it on my [Tuxedo Infinity Flexible 14 Gen 1](https://notes.sklein.xyz/Tuxedo%20Infinity%20Flexible%2014%20Gen%201/) laptop, which I currently don't use and which could serve as a development server until RAM prices drop
+- [ ] Test install Incus on Fedora CoreOS and install it on [Tuxedo Infinity Flexible 14 Gen 1](https://notes.sklein.xyz/Tuxedo%20Infinity%20Flexible%2014%20Gen%201/) laptop (see [`./incus-in-coreos-server/`](./incus-in-coreos-server/))
 
 ## AI-Assisted Development
 
