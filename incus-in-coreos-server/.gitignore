@@ -1,0 +1,5 @@
+images/
+*.ign
+*.iso
+coreos-custom-iso-config.bu
+wifi-home.nmconnection

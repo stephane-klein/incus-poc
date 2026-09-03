@@ -34,8 +34,8 @@ The driving motivation behind this POC is a likely future refactoring of [sklein
     - [ ] QEMU VM startup time
     - [x] Disk space used by a QEMU VM
     - [ ] RAM usage of a QEMU VM
-- [ ] Test [IncusOS](https://linuxcontainers.org/incus-os/introduction/) by installing it on my [Tuxedo Infinity Flexible 14 Gen 1](https://notes.sklein.xyz/Tuxedo%20Infinity%20Flexible%2014%20Gen%201/) laptop, which I currently don't use and which could serve as a development server until RAM prices drop
-- [ ] Test install Incus on Fedora CoreOS and install it on [Tuxedo Infinity Flexible 14 Gen 1](https://notes.sklein.xyz/Tuxedo%20Infinity%20Flexible%2014%20Gen%201/) laptop (see [`./incus-in-coreos-server/`](./incus-in-coreos-server/))
+- [x] Test install Incus on Fedora CoreOS and install it on [Tuxedo Infinity Flexible 14 Gen 1](https://notes.sklein.xyz/Tuxedo%20Infinity%20Flexible%2014%20Gen%201/) laptop (see [`./incus-in-coreos-server/`](./incus-in-coreos-server/))
+- [x] Test [IncusOS](https://linuxcontainers.org/incus-os/introduction/) by installing it on my [Tuxedo Infinity Flexible 14 Gen 1](https://notes.sklein.xyz/Tuxedo%20Infinity%20Flexible%2014%20Gen%201/) laptop, which I currently don't use and which could serve as a development server until RAM prices drop
 
 ## AI-Assisted Development
 

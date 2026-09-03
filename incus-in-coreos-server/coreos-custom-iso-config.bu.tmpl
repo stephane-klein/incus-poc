@@ -1,0 +1,374 @@
+# vim: set filetype=yaml :
+variant: fcos
+version: 1.6.0
+kernel_arguments:
+  should_exist:
+    # Suspend to RAM (S3 deep) instead of s2idle: required for Wake-on-LAN
+    # over the USB-attached RTL8153 adapter to wake from suspend.
+    - mem_sleep_default=deep
+systemd:
+  units:
+    - name: getty@tty1.service
+      dropins:
+      - name: autologin-core.conf
+        contents: |
+          [Service]
+          ExecStart=
+          ExecStart=-/usr/sbin/agetty --autologin stephane --noclear %I $TERM
+
+    - name: serial-getty@ttyS0.service
+      dropins:
+      - name: autologin-core.conf
+        contents: |
+          [Service]
+          # Override Execstart in main unit
+          ExecStart=
+          # Add new Execstart with `-` prefix to ignore failure`
+          ExecStart=-/usr/sbin/agetty --autologin stephane --noclear %I $TERM
+
+    # Installing some packages as a layered package with rpm-ostree
+    - name: rpm-ostree-install-1.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Layer install some packages with rpm-ostree
+        Wants=network-online.target
+        After=network-online.target
+        # We run before `zincati.service` to avoid conflicting rpm-ostree
+        # transactions.
+        Before=zincati.service
+        ConditionPathExists=!/var/lib/%N.stamp
+
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=/usr/bin/rpm-ostree install -y --allow-inactive netbird iwlwifi-mvm-firmware incus lvm2 dnsmasq qemu-system-x86 NetworkManager-wifi wpa_supplicant wireless-regdb
+        ExecStart=/bin/touch /var/lib/%N.stamp
+        ExecStart=/usr/bin/systemctl enable netbird-setup.service
+        ExecStart=/bin/systemctl --no-block reboot
+
+        [Install]
+        WantedBy=multi-user.target
+
+    - name: netbird-setup.service
+      enabled: false
+      contents: |
+        [Unit]
+        Description=Configure Netbird with setup key
+        Wants=network-online.target
+        After=network-online.target
+        Before=zincati.service
+        ConditionPathExists=!/var/lib/netbird-setup.stamp
+
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStartPre=/usr/bin/systemctl enable --now netbird
+        ExecStart=/usr/bin/netbird up --setup-key {{ ENV.NETBIRD_SETUP_KEY }}
+        ExecStart=/bin/touch /var/lib/netbird-setup.stamp
+
+        [Install]
+        WantedBy=multi-user.target
+
+    - name: incus-setup.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Configure Incus (thin LVM pool, bridge, https, trust)
+        Wants=network-online.target
+        After=network-online.target
+        Before=zincati.service
+        ConditionFileIsExecutable=/usr/bin/incus
+        ConditionPathExists=!/var/lib/incus-setup.stamp
+
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=/usr/local/sbin/incus-setup.sh
+        ExecStart=/bin/touch /var/lib/incus-setup.stamp
+
+        [Install]
+        WantedBy=multi-user.target
+
+    - name: console-blanking@.service
+      contents: |
+        [Unit]
+        Description=Blank and powerdown console
+        ConditionPathExists=/dev/%i
+        After=systemd-vconsole-setup.service
+
+        [Service]
+        Type=oneshot
+        Environment=TERM=linux
+        StandardOutput=tty
+        TTYPath=/dev/%i
+        ExecStart=/usr/bin/setterm -blank 1 -powerdown 1
+
+        [Install]
+        WantedBy=multi-user.target
+
+    - name: console-blanking@tty0.service
+      enabled: true
+
+    - name: wifi-home-up.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Ensure wifi-home backup connection is active at boot
+        Wants=network-online.target
+        After=network-online.target
+        # NetworkManager does not auto-activate a second uplink when Ethernet
+        # already owns the default route; re-assert the backup connection here.
+        Before=zincati.service
+
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=-/usr/bin/nmcli --wait 30 connection up wifi-home
+
+        [Install]
+        WantedBy=multi-user.target
+
+    # Wake-on-LAN over the USB-attached RTL8153 adapter (the InfinityFlex 14 has
+    # no built-in RJ45). The sysfs/ethtool settings are ephemeral and must be
+    # re-applied at every boot for the laptop to be woken from suspend remotely.
+    - name: wol-setup.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Enable Wake-on-LAN over USB ethernet
+        Wants=network-online.target
+        After=network-online.target
+
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=/usr/local/sbin/wol-setup.sh
+
+        [Install]
+        WantedBy=multi-user.target
+
+passwd:
+  users:
+    - name: root
+      password_hash: "{{ ENV.PASSWORD_HASH }}"
+    - name: stephane
+      groups:
+        - wheel
+        - sudo
+      password_hash: "{{ ENV.PASSWORD_HASH }}"
+      ssh_authorized_keys:
+        - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDEzyNFlEuHIlewK0B8B0uAc9Q3JKjzi7myUMhvtB3JmA2BqHfVHyGimuAajSkaemjvIlWZ3IFddf0UibjOfmQH57/faxcNEino+6uPRjs0pFH8sNKWAaPX1qYqOFhB3m+om0hZDeQCyZ1x1R6m+B0VJHWQ3pxFaxQvL/K+454AmIWB0b87MMHHX0UzUja5D6sHYscHo57rzJI1fc66+AFz4fcRd/z+sUsDlLSIOWfVNuzXuGpKYuG+VW9moiMTUo8gTE9Nam6V2uFwv2w3NaOs/2KL+PpbY662v+iIB2Yyl4EP1JgczShOoZkLatnw823nD1muC8tYODxVq7Xf7pM/NSCf3GPCXtxoOEqxprLapIet0uBSB4oNZhC9h7K/1MEaBGbU+E2J5/5hURYDmYXy6KZWqrK/OEf4raGqx1bsaWcONOfIVXbj3zXTUobsqSkyCkkR3hJbf39JZ8/6ONAJS/3O+wFZknFJYmaRPuaWiLZxRj5/gw01vkNVMrogOIkQtzNDB6fh2q27ghSRkAkM8EVqkW21WkpB7y16Vzva4KSZgQcFcyxUTqG414fP+/V38aCopGpqB6XjnvyRorPHXjm2ViVWbjxmBSQ9aK0+2MeKA9WmHN0QoBMVRPrN6NBa3z20z1kMQ/qlRXiDFOEkuW4C1n2KTVNd6IOGE8AufQ== contact@stephane-klein.info
+
+storage:
+  disks:
+    - device: /dev/disk/by-id/coreos-boot-disk
+      wipe_table: false
+      partitions:
+        # CoreOS root partition resized to 40 GiB
+        - number: 4
+          label: root
+          size_mib: 40960
+          resize: true
+        # Future Incus thin LVM pool partition, filling the rest of the disk
+        - label: incus-pool
+          type_guid: e6d6d379-f507-44c2-a23c-238f2a3df928 # Linux LVM
+
+  files:
+    - path: /etc/hostname
+      mode: 0644
+      contents:
+        inline: |
+          incus-server1.homelab.stephane-klein.info
+
+    # https://docs.fedoraproject.org/en-US/fedora-coreos/sysconfig-setting-keymap/
+    - path: /etc/vconsole.conf
+      mode: 0644
+      contents:
+        inline: |
+          KEYMAP=fr-bepo
+          FONT=eurlatgr
+
+    - path: /etc/zincati/config.d/55-updates-strategy.toml
+      mode: 0644
+      contents:
+        inline: |
+          [updates]
+          strategy = "periodic"
+          
+          [[updates.periodic.window]]
+          days = [ "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" ]
+          start_time = "02:00" # UTC
+          length_minutes = 180
+
+    - path: /etc/incus-preseed.yaml
+      mode: 0644
+      contents:
+        inline: |
+          config:
+            core.https_address: '[::]:8443'
+          storage_pools:
+          - name: default
+            driver: lvm
+            config:
+              source: /dev/disk/by-partlabel/incus-pool
+          networks:
+          - name: incusbr0
+            type: bridge
+            config:
+              ipv4.address: auto
+              ipv6.address: auto
+          profiles:
+          - name: default
+            devices:
+              root:
+                path: /
+                pool: default
+                type: disk
+              eth0:
+                name: eth0
+                network: incusbr0
+                type: nic
+          certificates:
+          - certificate: |
+              {{ ENV.INCUS_CLIENT_CERT }}
+            name: stephane-workstation
+            type: client
+
+    - path: /usr/local/sbin/incus-setup.sh
+      mode: 0755
+      contents:
+        inline: |
+          #!/usr/bin/env bash
+          set -euo pipefail
+
+          # Map root UID/GID for unprivileged containers
+          grep -q '^root:1000000:1000000000$' /etc/subuid || echo 'root:1000000:1000000000' >> /etc/subuid
+          grep -q '^root:1000000:1000000000$' /etc/subgid || echo 'root:1000000:1000000000' >> /etc/subgid
+
+          # incus-admin group lives in /usr/lib/group (altfiles), not /etc/group: recreate a clean entry
+          sed -i '/^incus-admin:/d' /etc/group
+          getent group incus-admin >> /etc/group
+          usermod -aG incus-admin stephane
+
+          # Purge any leftover LVM state from a previous install
+          if [ -e /dev/disk/by-partlabel/incus-pool ]; then
+              for vg in $(pvs --noheadings -o vg_name /dev/disk/by-partlabel/incus-pool 2>/dev/null); do
+                  vgchange -an "${vg}" 2>/dev/null || true
+                  vgremove -ff "${vg}" 2>/dev/null || true
+              done
+              pvremove -ff -y /dev/disk/by-partlabel/incus-pool 2>/dev/null || true
+          fi
+
+          # Start Incus (idmap is now correct) and apply the configuration
+          systemctl enable --now incus.service
+          /usr/bin/incus admin init --preseed < /etc/incus-preseed.yaml
+
+    - path: /usr/local/sbin/wol-setup.sh
+      mode: 0755
+      contents:
+        inline: |
+          #!/usr/bin/env bash
+          set -euo pipefail
+
+          # The InfinityFlex 14 has no built-in RJ45: Ethernet is provided by a
+          # Realtek RTL8153 USB adapter (behind a VL810 hub, on the Thunderbolt
+          # 4 controller). Waking the laptop from suspend over Ethernet therefore
+          # requires USB remote wakeup, which is lost on every boot/reboot:
+          # re-arm it here (called by `wol-setup.service`).
+          #
+          # The real S3 "deep" suspend is enforced by the `mem_sleep_default=deep`
+          # kernel argument (see `kernel_arguments` in this butane file).
+
+          # 1. Re-apply the WoL magic-packet flag on the RTL8153 interface.
+          IFACE=""
+          for n in /sys/class/net/*; do
+              drv="$(readlink -f "$n/device/driver" 2>/dev/null || true)"
+              if [ "$(basename "$drv")" = "r8152" ]; then
+                  IFACE="$(basename "$n")"
+                  break
+              fi
+          done
+          if [ -n "$IFACE" ]; then
+              ethtool -s "$IFACE" wol g
+          fi
+
+          # 2. Enable USB remote wakeup on the RTL8153 device and on every
+          #    ancestor up to the root hub of the USB controller.
+          NIC_USB=""
+          for d in /sys/bus/usb/devices/*/; do
+              if [ "$(cat "$d/idVendor" 2>/dev/null)" = "0bda" ] && \
+                 [ "$(cat "$d/idProduct" 2>/dev/null)" = "8153" ]; then
+                  NIC_USB="$(readlink -f "$d")"
+                  break
+              fi
+          done
+          if [ -n "$NIC_USB" ]; then
+              dir="$NIC_USB"
+              while :; do
+                  base="$(basename "$dir")"
+                  case "$base" in
+                      usb[0-9]*|[0-9]*-[0-9.]*)
+                          if [ -w "$dir/power/wakeup" ]; then
+                              echo enabled > "$dir/power/wakeup"
+                          fi
+                          ;;
+                      *)
+                          break
+                          ;;
+                  esac
+                  parent="$(dirname "$dir")"
+                  [ -d "$parent" ] || break
+                  dir="$parent"
+              done
+          fi
+
+    - path: /etc/yum.repos.d/netbird.repo
+      mode: 0644
+      contents:
+        inline: |
+          [NetBird]
+          name=NetBird
+          baseurl=https://pkgs.netbird.io/yum/
+          enabled=1
+          gpgcheck=1
+          gpgkey=https://pkgs.netbird.io/yum/repodata/repomd.xml.key
+          repo_gpgcheck=1
+
+    - path: /etc/NetworkManager/system-connections/wifi-home.nmconnection
+      mode: 0600
+      contents:
+        inline: |
+          [connection]
+          id=wifi-home
+          type=wifi
+          autoconnect=true
+
+          [wifi]
+          ssid=stephane-klein.info_5G
+          mode=infrastructure
+
+          [wifi-security]
+          key-mgmt=wpa-psk
+          psk={{ ENV.WIFI_PSK }}
+
+          [ipv4]
+          method=auto
+          route-metric=600
+          [ipv6]
+          method=auto
+          route-metric=600
+
+    - path: /etc/systemd/logind.conf.d/override.conf
+      mode: 0644
+      contents:
+        inline: |
+          [Login]
+          HandleLidSwitch=ignore
+          HandleLidSwitchExternalPower=ignore
+          HandleLidSwitchDocked=ignore
+
+  links:
+    - path: /etc/localtime
+      target: ../usr/share/zoneinfo/Europe/Paris
+      overwrite: true

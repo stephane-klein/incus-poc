@@ -1,0 +1,10 @@
+[tools]
+"github:mitsuhiko/minijinja" = { version = "2.24.0", bin = "minijinja-cli" }
+
+[tasks.create-custom-iso]
+description = "Builds a custom Fedora CoreOS ISO targeted at the Tuxedo"
+run = "bash scripts/create-custom-iso.sh"
+
+[tasks.write-to-usb]
+description = "Writes the custom CoreOS ISO to a USB stick (interactive)"
+run = "bash scripts/write-to-usb-interactive.sh"

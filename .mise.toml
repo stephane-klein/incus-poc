@@ -3,6 +3,7 @@ monorepo_root = true
 [monorepo]
 config_roots = [
     "build-images/",
+    "incus-in-coreos-server/",
     "incus-os/"
 ]
 
