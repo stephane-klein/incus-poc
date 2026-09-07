@@ -372,24 +372,6 @@ actions:
 
     set -eux
 
-    # Use Fedora 38 GPG key to avoid package installation errors
-    for repo in $(ls /etc/yum.repos.d/*.repo); do
-      grep -q 'RPM-GPG-KEY-fedora-38' "${repo}" && continue
-
-      sed -ri 's#^gpgkey=.*#\0 file:///etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-38-$basearch#g' "${repo}"
-    done
-  architectures:
-  - aarch64
-  - x86_64
-  releases:
-  - Rawhide
-
-- trigger: post-unpack
-  action: |-
-    #!/bin/sh
-
-    set -eux
-
     # Use baseurl instead of metalink to avoid networking issues
     for repo in $(ls /etc/yum.repos.d/*.repo); do
       grep -q '^#baseurl' "${repo}" || continue
